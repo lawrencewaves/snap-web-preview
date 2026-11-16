@@ -307,3 +307,10 @@ dialog{border:0;border-radius:var(--r);overflow:hidden}
 #enquire>.pad:first-child:not(.dark) a{color:var(--paper)}
 .enq{align-items:end}
 @media (max-width:860px){#enquire>.pad:first-child{position:static}}
+/* formulario v2: las dos tarjetas con la misma altura, contenido arriba y pasos abajo */
+#enquire.split{align-items:stretch}
+#enquire>.pad:first-child{position:static;display:flex;flex-direction:column;justify-content:flex-start}
+#enquire>.pad:last-child{display:flex;flex-direction:column;justify-content:flex-start}
+.mini{list-style:none;padding:0;margin:auto 0 0;display:flex;flex-direction:column;width:100%;padding-top:32px}
+.mini li{display:flex;gap:18px;align-items:baseline;padding:16px 0;border-top:1px solid rgba(244,241,234,.22);font-size:17px}
+.mini b{font:400 26px/1 Anton,sans-serif;color:var(--orange)}
