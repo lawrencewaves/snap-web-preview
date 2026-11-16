@@ -16,9 +16,62 @@
   // contador propio sin cookies (solo en el servidor real)
   if (!DEMO && navigator.sendBeacon) try { navigator.sendBeacon(B.api.replace('enquiry.php', 'hit.php'), JSON.stringify({ p: location.pathname, s: utm.utm_source || '', r: document.referrer })); } catch (e) {}
 
-  document.querySelectorAll('[data-copy]').forEach(function (b) {
+  function bindCopy(b) {
     b.addEventListener('click', function () { var t = b.textContent; (navigator.clipboard ? navigator.clipboard.writeText(b.dataset.copy) : Promise.reject()).then(function () { b.textContent = '✓'; setTimeout(function () { b.textContent = t; }, 1600); }).catch(function () { prompt('', b.dataset.copy); }); });
-  });
+  }
+  document.querySelectorAll('[data-copy]').forEach(bindCopy);
+
+  // Buscador de surf trip: puntuación transparente con los datos de cada destino (mdata)
+  var mf = document.getElementById('matcher'), mr = document.getElementById('mres');
+  if (mf) {
+    var M = JSON.parse(document.getElementById('mdata').textContent), T = M.t;
+    var score = function (k, a) {
+      var D = M.d[k], s = 50, why = [], no = [], size = +a.size, mo = +a.month;
+      if (size > D.max) no.push('big');
+      if (a.who === 'school' && !D.minors) no.push('noMinors');
+      if (mo && (D.months.indexOf(mo) < 0 || (size >= 20 && D.groupClosed.indexOf(mo) >= 0))) no.push('closed');
+      if (no.length) return { k: k, s: 0, why: no };
+      why.push('size'); if (mo) { why.push('month'); s += 10; }
+      if (a.who === 'school') { why.push('minors'); s += 10; }
+      s += D.vibe[a.vibe] || 0;
+      if ((a.level === 'never' || a.level === 'beginner' || a.vibe === 'learn') && D.lessons) { why.push('lessons'); s += 10; }
+      if ((a.vibe === 'work' || a.who === 'company') && D.vibe.work >= 10) why.push('work');
+      if ((D.vibe[a.vibe] || 0) >= 20) why.push('vibe');
+      return { k: k, s: Math.min(99, s), why: why };
+    };
+    var esc = function (t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
+    var show = function (a, shared) {
+      var res = Object.keys(M.d).map(function (k) { return score(k, a); }).sort(function (x, y) { return y.s - x.s; });
+      var best = res[0], html = '';
+      if (!best.s) { html = '<p class="lead">' + esc(T.none) + '</p><a class="btn btn-ink" href="' + M.u.contact + '">' + (M.lang === "es" ? "Contactar" : "Contact us") + '</a>'; }
+      else {
+        var link = location.origin + location.pathname + '?r=' + best.k;
+        html = '<article class="mcard"><p class="kicker">' + (shared ? '★ ' : '') + Math.round(best.s) + '% match</p><h2 class="mega">' + esc(T[best.k]) + '</h2><p class="kicker">' + esc(T.why) + '</p><ul>' +
+          best.why.map(function (w) { return '<li>✓ ' + esc(T.r[w]) + '</li>'; }).join('') + '</ul><div class="row">' +
+          '<a class="btn btn-orange" href="#enquire" id="mgo">' + (M.lang === 'es' ? 'Pedir mi propuesta' : 'Request my proposal') + '</a>' +
+          '<a class="btn" href="' + M.u[best.k] + '">' + (M.lang === 'es' ? 'Ver el destino' : 'See the destination') + '</a></div>' +
+          '<div class="row"><a class="btn sm" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent((M.lang === 'es' ? 'Mi surf trip ideal: ' : 'My surf trip match: ') + T[best.k] + ' ' + link) + '">WhatsApp</a>' +
+          '<button class="btn sm" type="button" data-copy="' + link + '">' + (M.lang === 'es' ? 'Copiar enlace' : 'Copy link') + '</button></div></article>';
+        var alt = res[1];
+        if (alt && alt.s) html += '<p class="kicker">' + esc(T.alt) + ': <a href="' + M.u[alt.k] + '">' + esc(T[alt.k]) + '</a> · ' + Math.round(alt.s) + '%</p>';
+        var f = document.querySelector('#enquire form'), set = function (n, v) { var i = f.querySelector('[name=' + n + ']'); if (i) i.value = v; };
+        set('listingId', M.d[best.k].listing); set('people', a.size); set('dates', a.month === '0' ? 'flexible' : a.month); set('level', a.level || ''); set('groupType', a.who || '');
+        f.dataset.type = +a.size >= 20 ? 'group' : 'individual'; window.__match = a; document.getElementById('enquire').hidden = false;
+      }
+      mr.innerHTML = html; mr.hidden = false;
+      mr.querySelectorAll('[data-copy]').forEach(bindCopy);
+      mr.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      if (window.gtag) window.gtag('event', 'matcher_result', { destination: best.k });
+    };
+    mf.addEventListener('submit', function (ev) {
+      ev.preventDefault(); var a = {}, miss = null;
+      ['who', 'size', 'month', 'level', 'vibe'].forEach(function (n) { var c = mf.querySelector('[name=' + n + ']:checked'); if (c) a[n] = c.value; else if (!miss) miss = mf.querySelector('[name=' + n + ']'); });
+      if (miss) { miss.closest('fieldset').scrollIntoView({ block: 'center' }); miss.focus(); return; }
+      show(a, false);
+    });
+    var r = new URLSearchParams(location.search).get('r');
+    if (r && M.d[r]) { mr.innerHTML = '<article class="mcard"><p class="kicker">★ ' + (M.lang === 'es' ? 'Te han compartido este destino' : 'A friend shared this match') + '</p><h2 class="mega">' + esc(T[r]) + '</h2><div class="row"><a class="btn btn-orange" href="#matcher">' + (M.lang === 'es' ? 'Haz tu test' : 'Take the test') + '</a><a class="btn" href="' + M.u[r] + '">' + (M.lang === 'es' ? 'Ver el destino' : 'See the destination') + '</a></div></article>'; mr.hidden = false; }
+  }
 
   var mb = document.querySelector('.menu-btn'), mn = document.getElementById('mainnav');
   if (mb) mb.addEventListener('click', function () { var o = mn.classList.toggle('open'); mb.setAttribute('aria-expanded', o); });
@@ -60,6 +113,7 @@
       d.consent = !!f.querySelector('[name=consent]').checked;
       d.marketing = !!f.querySelector('[name=marketing]').checked;
       d.flexible = !!(f.querySelector('[name=flexible]') || {}).checked;
+      if (window.__match && f.closest('#enquire') && document.getElementById('matcher')) d.matcher = window.__match;
 
       if (DEMO) { showOk('DEMO'); return; }
       btn.disabled = true;

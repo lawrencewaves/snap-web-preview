@@ -6,7 +6,7 @@ import sys, os, re, json, shutil, pathlib, datetime
 SRC = pathlib.Path(__file__).resolve().parent
 DIST = SRC.parent / "dist"
 DOMAIN = (sys.argv[1] if len(sys.argv) > 1 else "https://TU-DOMINIO.com").rstrip("/")
-GA_ID = ""            # ID de Google Analytics 4. Vacío = la web no usa ninguna cookie ni muestra banner.
+GA_ID = os.environ.get("SNAP_GA_ID", "")            # ID de Google Analytics 4. Vacío = la web no usa ninguna cookie ni muestra banner.
 LISTING = "sagres-surf-house-01"
 TODAY = datetime.date.today().isoformat()
 DIMS = json.load(open(SRC / "dims.json"))
@@ -246,6 +246,7 @@ def home():
 <a class="btn" href="{url("camps")}">{L("Join the SNAP network", "Únete a la red SNAP")}</a>
 </section>
 
+{match_cta()}
 {home_guides()}
 {ig_block()}
 <section class="pad orange closing">
@@ -650,7 +651,7 @@ def page(key):
 <main id="main">{crumb}{body}</main>
 <footer class="foot">
 <div><a class="logo" href="{url("home")}">{logo}</a><p class="small">{L("Surf trips around the world for travellers and groups.", "Viajes de surf por el mundo para viajeros y grupos.")}<br>{ORG["email"]} · {ORG["tel"]}</p>{social}</div>
-<nav aria-label="{L("Site", "Sitio")}"><a href="{url("trips")}">{L("Surf destinations", "Destinos de surf")}</a><a href="{url("sagres")}">{L("Surf trip to Sagres", "Viaje de surf a Sagres")}</a><a href="{url("groups")}">{L("Group surf trips", "Viajes de surf para grupos")}</a><a href="{url("camps")}">{L("For surf camps", "Para surf camps")}</a><a href="{url("guides")}">{L("Surf guides", "Guías de surf")}</a><a href="{url("faq")}">FAQ</a><a href="{url("contact")}">{L("Contact", "Contacto")}</a></nav>
+<nav aria-label="{L("Site", "Sitio")}"><a href="{url("trips")}">{L("Surf destinations", "Destinos de surf")}</a><a href="{url("match")}">{L("Surf trip matcher", "Encuentra tu surf trip")}</a><a href="{url("sagres")}">{L("Surf trip to Sagres", "Viaje de surf a Sagres")}</a><a href="{url("groups")}">{L("Group surf trips", "Viajes de surf para grupos")}</a><a href="{url("camps")}">{L("For surf camps", "Para surf camps")}</a><a href="{url("guides")}">{L("Surf guides", "Guías de surf")}</a><a href="{url("faq")}">FAQ</a><a href="{url("contact")}">{L("Contact", "Contacto")}</a></nav>
 <nav aria-label="Legal"><a href="{url("notice")}">{L("Legal notice", "Aviso legal")}</a><a href="{url("privacy")}">{L("Privacy policy", "Privacidad")}</a><a href="{url("cookies")}">{L("Cookie policy", "Cookies")}</a><a href="{url("terms")}">{L("Terms", "Condiciones")}</a>{cks}</nav>
 <p class="small legal-line">© {TODAY[:4]} SNAP SURF TRIPS · {L("A brand of", "Marca de")} {ORG["name"]} · NIF {ORG["nif"]}</p>
 </footer>
@@ -732,6 +733,14 @@ def build(out, preview):
         shutil.rmtree(out / "api")
         return
     (out / "404.html").write_text(not_found(), encoding="utf-8")
+    ga = " https://www.googletagmanager.com https://*.google-analytics.com" if GA_ID else ""
+    csp = (f"default-src 'self'; script-src 'self'{ga}; style-src 'self'; img-src 'self' data:{ga}; font-src 'self'; "
+           f"connect-src 'self'{ga}; form-action 'self'; frame-ancestors 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests")
+    ht = out / ".htaccess"
+    ht.write_text(ht.read_text().replace("#CSP#", f'Header always set Content-Security-Policy "{csp}"'))
+    wk = out / ".well-known"; wk.mkdir(exist_ok=True)
+    exp = (datetime.date.today() + datetime.timedelta(days=365)).isoformat()
+    (wk / "security.txt").write_text(f"Contact: mailto:{ORG['email']}\nExpires: {exp}T00:00:00Z\nPreferred-Languages: es, en\nCanonical: {DOMAIN}/.well-known/security.txt\n")
     (out / "llms.txt").write_text(llms(), encoding="utf-8")
     (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: {DOMAIN}/sitemap.xml\n", encoding="utf-8")
     urls = ""

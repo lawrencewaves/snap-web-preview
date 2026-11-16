@@ -12,6 +12,11 @@ if (!is_file($cfgFile)) out(500, ['ok' => false, 'error' => 'config']);
 $cfg = require $cfgFile;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') out(405, ['ok' => false, 'error' => 'method']);
+// Solo se aceptan envíos desde la propia web (evita que otras webs o robots usen el formulario)
+$origin = (string)($_SERVER['HTTP_ORIGIN'] ?? '');
+$allowed = array_filter((array)($cfg['allowedOrigins'] ?? []));
+if ($allowed && !in_array(rtrim($origin, '/'), $allowed, true)) out(403, ['ok' => false, 'error' => 'origin']);
+if (stripos((string)($_SERVER['CONTENT_TYPE'] ?? ''), 'application/json') !== 0) out(415, ['ok' => false, 'error' => 'type']);
 $raw = file_get_contents('php://input', false, null, 0, 20000);
 $d = json_decode($raw ?: '', true);
 if (!is_array($d)) out(400, ['ok' => false, 'error' => 'json']);
@@ -21,7 +26,8 @@ if (!empty($d['website']) || (int)($d['elapsed'] ?? 0) < 3) out(200, ['ok' => tr
 
 $clean = function ($v, int $max = 300): string {
     $v = is_scalar($v) ? (string)$v : '';
-    return mb_substr(trim(preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/u', '', $v) ?? ''), 0, $max);
+    // sin caracteres de control ni saltos de línea en campos de una línea (evita inyecciones en cabeceras y registros)
+    return mb_substr(trim(preg_replace('/[\x00-\x1F\x7F]/u', ' ', $v) ?? ''), 0, $max);
 };
 $type = $clean($d['type'] ?? '', 20);
 if (!in_array($type, ['individual', 'group', 'partner', 'general'], true)) out(400, ['ok' => false, 'error' => 'type']);
@@ -30,12 +36,17 @@ $name = $clean($d['name'] ?? '', 120);
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $name === '' || empty($d['consent'])) out(422, ['ok' => false, 'error' => 'required']);
 
 $fields = ['organisation', 'phone', 'country', 'people', 'dates', 'nights', 'level', 'groupType', 'ages', 'destination',
-           'budget', 'needs', 'campWebsite', 'listingId', 'packageId', 'priceShown', 'page', 'lang'];
+           'budget', 'needs', 'campWebsite', 'listingId', 'packageId', 'page', 'lang'];
 $e = ['type' => $type, 'name' => $name, 'email' => $email];
 foreach ($fields as $k) { $v = $clean($d[$k] ?? ''); if ($v !== '') $e[$k] = $v; }
-$msg = $clean($d['message'] ?? '', 3000); if ($msg !== '') $e['message'] = $msg;
+$msg = mb_substr(trim(preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', is_scalar($d['message'] ?? '') ? (string)($d['message'] ?? '') : '') ?? ''), 0, 3000); if ($msg !== '') $e['message'] = $msg;
 $e['flexible'] = !empty($d['flexible']);
 $e['consent'] = ['privacy' => true, 'marketing' => !empty($d['marketing']), 'at' => gmdate('c')];
+if (isset($d['matcher']) && is_array($d['matcher'])) {   // respuestas del buscador de surf trip (para el scoring del CRM)
+    foreach (array_slice($d['matcher'], 0, 12, true) as $k => $v) {
+        if (preg_match('/^[a-z]{1,12}$/', (string)$k)) $e['matcher'][$k] = is_array($v) ? array_map(fn($y) => $clean($y, 40), array_slice($v, 0, 4)) : $clean($v, 60);
+    }
+}
 if (isset($d['utm']) && is_array($d['utm'])) {
     foreach (array_slice($d['utm'], 0, 6, true) as $k => $v) {
         if (preg_match('/^utm_[a-z]{2,10}$/', (string)$k)) $e['utm'][$k] = $clean($v, 120);

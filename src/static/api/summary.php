@@ -7,6 +7,9 @@ if (PHP_SAPI !== 'cli' && (str_starts_with((string)$cfg['cronKey'], 'CAMBIAR') |
 
 $db = new PDO('sqlite:' . $cfg['db']);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// Conservación: borra de la cola las solicitudes de más de N meses (ya están en el CRM) y las visitas de más de 13 meses
+$db->prepare('DELETE FROM enquiries WHERE received_at < ?')->execute([gmdate('c', strtotime('-' . (int)($cfg['retentionMonths'] ?? 24) . ' months'))]);
+try { $db->prepare('DELETE FROM hits WHERE day < ?')->execute([gmdate('Y-m-d', strtotime('-13 months'))]); } catch (Throwable $t) {}
 $h = 'From: SNAP Web <' . $cfg['from'] . ">\r\nContent-Type: text/plain; charset=utf-8";
 
 foreach ($db->query('SELECT id, type, data FROM enquiries WHERE mail_sent = 0') as $r) {

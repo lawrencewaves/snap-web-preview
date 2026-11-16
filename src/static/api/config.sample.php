@@ -7,4 +7,6 @@ return [
     'salt'       => 'CAMBIAR-por-un-texto-largo-aleatorio',
     'cronKey'    => 'CAMBIAR-por-otro-texto-largo-aleatorio',
     'maxPerHour' => 5,
+    'allowedOrigins' => ['https://www.TU-DOMINIO.com', 'https://TU-DOMINIO.com'],   // vacío = sin comprobar (solo para pruebas)
+    'retentionMonths' => 24,                          // solicitudes sin reserva: se borran a los 24 meses (política de privacidad)
 ];

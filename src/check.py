@@ -5,7 +5,7 @@ root=pathlib.Path('/home/claude/site/dist/preview')
 pages=sorted(str(p.relative_to(root)) for p in root.rglob('index.html'))
 CHK="""()=>{const W=document.documentElement.clientWidth;
 const o=[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.right>W+1||r.left<-1)&&!e.closest('.hp,.skip,svg,.ticker')}).slice(0,3).map(e=>e.tagName+'.'+e.className);
-const small=[...document.querySelectorAll('a.btn,button,input:not([type=hidden]):not(.hp):not([type=checkbox]),select,label.check,.social a')].filter(e=>{const r=e.getBoundingClientRect();return r.height>0&&r.height<40}).map(e=>e.tagName+'.'+e.className);
+const small=[...document.querySelectorAll('a.btn,button,input:not([type=hidden]):not(.hp):not([type=checkbox]):not([type=radio]),select,label.check,.social a,.pill span')].filter(e=>{const r=e.getBoundingClientRect();return r.height>0&&r.height<40}).map(e=>e.tagName+'.'+e.className);
 const img=[...document.images].filter(i=>i.complete&&i.naturalWidth===0).length;
 return {sw:document.documentElement.scrollWidth,W,o,small,img}}"""
 async def main():

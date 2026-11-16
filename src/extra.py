@@ -109,7 +109,7 @@ def trips():
     return f'''
 <section class="pad"><h1 class="kicker">{L("Surf trips and surf camp destinations", "Viajes de surf y destinos de surf camp")}</h1>
 <p class="mega">{L("Where<br>we <mark>surf</mark>", "Dónde<br><mark>surfeamos</mark>")}</p>
-<p class="lead">{L("Each destination is a surf camp or surf house we work with. Pick one and send one enquiry: you get one personalised proposal.", "Cada destino es un surf camp o surf house con el que trabajamos. Elige uno y envía una solicitud: recibes una propuesta personalizada.")}</p></section>
+<p class="lead">{L("Each destination is a surf camp or surf house we work with. Pick one and send one enquiry: you get one personalised proposal.", "Cada destino es un surf camp o surf house con el que trabajamos. Elige uno y envía una solicitud: recibes una propuesta personalizada.")}</p><a class="btn btn-orange" href="{url("match")}">{L("Not sure? Find your match", "¿Dudas? Encuentra tu destino")}</a></section>
 <section class="pad dest">
 <a class="dcard" href="{url("sagres")}">{pic("sagres-coast", L("Beach and cliffs near Sagres", "Playa y acantilados cerca de Sagres"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Portugal · Algarve</span><span class="h2">Sagres</span><span>{L("Surf house with pool · 3, 5 and 7 nights →", "Surf house con piscina · 3, 5 y 7 noches →")}</span></a>
 <a class="dcard" href="{url("bali")}">{poster("BALI", "Uluwatu · Bukit", "card")}<span class="kicker">Indonesia · Bali</span><span class="h2">Bali</span><span>{L("Surf &amp; coworking hotel · all year · up to 18 →", "Hotel de surf y coworking · todo el año · hasta 18 →")}</span></a>
@@ -283,3 +283,62 @@ def og_poster(dest, word, sub):
     small = ImageFont.truetype(str(f), 40) if f.exists() else ImageFont.load_default()
     d.text((70, 250), word, font=big, fill=(244, 241, 234)); d.text((76, 548), sub, font=small, fill=(244, 241, 234))
     im.save(dest, quality=85)
+
+
+# ---------- Buscador de surf trip (matcher) ----------
+# Reglas = datos de camps/{id} del CRM (16/11). Sin «IA» de cara al cliente: puntuación transparente con motivos.
+# Las respuestas viajan en la solicitud (inbound.data.matcher) y alimentan el scoring/campFit del CRM (M_WEB).
+EXTRA_PATHS["match"] = ("surf-trip-matcher/", "es/encuentra-tu-surf-trip/")
+MATCH_DATA = {
+    "sagres": {"listing": "sagres-surf-house-01", "max": 100, "minors": True, "months": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+               "groupClosed": [1, 2, 8], "lessons": True,
+               "vibe": {"learn": 25, "progress": 15, "work": 10, "social": 20, "nature": 20}},
+    "bali": {"listing": "bali-bukit-01", "max": 18, "minors": False, "months": list(range(1, 13)), "groupClosed": [], "lessons": False,
+             "vibe": {"learn": 5, "progress": 15, "work": 30, "social": 15, "nature": 15}},
+}
+
+
+def q(name, label, opts):
+    o = "".join(f'<label class="pill"><input type="radio" name="{name}" value="{v}" required><span>{t}</span></label>' for v, t in opts)
+    return f'<fieldset class="mq"><legend class="h3">{label}</legend><div class="pills">{o}</div></fieldset>'
+
+
+def match():
+    months = L(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"])
+    data = {"d": MATCH_DATA, "u": {k: url(k) for k in ("sagres", "bali", "groups", "contact")}, "lang": LANG,
+            "t": {"sagres": "Sagres · Portugal", "bali": "Bali · Indonesia",
+                  "why": L("Why", "Por qué"), "alt": L("Also a good fit", "También encaja"), "none": L("No destination fits those answers yet. Tell us what you need and we look for it.", "Todavía no hay un destino que encaje con esas respuestas. Cuéntanos qué buscas y lo buscamos."),
+                  "r": {"size": L("Fits your group size", "Encaja con el tamaño de vuestro grupo"), "month": L("Open in the month you chose", "Abierto en el mes que has elegido"),
+                        "lessons": L("Surf school on site: perfect to start", "Escuela de surf propia: ideal para empezar"), "work": L("Coworking to combine surf and work", "Coworking para combinar surf y trabajo"),
+                        "minors": L("Accepts school groups from 16", "Acepta grupos escolares desde 16 años"), "vibe": L("Matches the trip you are looking for", "Encaja con el viaje que buscas"),
+                        "big": L("Too many people for this place", "Demasiadas personas para este alojamiento"), "closed": L("Closed for groups that month", "Cerrado para grupos ese mes"), "noMinors": L("Adults only", "Solo adultos")}}}
+    import json as _json
+    return f'''
+<section class="pad"><h1 class="kicker">{L("Surf trip matcher", "Buscador de surf trip")}</h1>
+<p class="mega">{L("Find your<br><mark>surf trip</mark>", "Encuentra tu<br><mark>surf trip</mark>")}</p>
+<p class="lead">{L("Five questions, thirty seconds. We match your answers with the surf camps we work with and tell you why.", "Cinco preguntas, treinta segundos. Cruzamos tus respuestas con los surf camps con los que trabajamos y te decimos por qué.")}</p></section>
+<section class="pad"><form id="matcher" class="matcher" novalidate>
+{q("who", L("Who is travelling?", "¿Quién viaja?"), L([("solo", "Just me"), ("friends", "Friends or couple"), ("students", "University / Erasmus"), ("school", "School group (16+)"), ("company", "Company / team"), ("club", "Club / association")], [("solo", "Solo yo"), ("friends", "Amigos o pareja"), ("students", "Universidad / Erasmus"), ("school", "Grupo escolar (16+)"), ("company", "Empresa / equipo"), ("club", "Club / asociación")]))}
+{q("size", L("How many people?", "¿Cuántas personas?"), [("1", "1"), ("4", "2–6"), ("12", "7–18"), ("25", "19–30"), ("50", "31–60"), ("80", "60+")])}
+{q("month", L("When?", "¿Cuándo?"), [(str(i + 1), m) for i, m in enumerate(months)] + [("0", L("Flexible", "Flexible"))])}
+{q("level", L("Surf level", "Nivel de surf"), L([("never", "Never surfed"), ("beginner", "Beginner"), ("intermediate", "Intermediate"), ("advanced", "Advanced"), ("mixed", "Mixed")], [("never", "Nunca"), ("beginner", "Principiante"), ("intermediate", "Intermedio"), ("advanced", "Avanzado"), ("mixed", "Mezclado")]))}
+{q("vibe", L("What do you want most?", "¿Qué buscas sobre todo?"), L([("learn", "Learn to surf"), ("progress", "Progress"), ("work", "Surf + remote work"), ("social", "Good vibes with the group"), ("nature", "Nature and calm")], [("learn", "Aprender a surfear"), ("progress", "Progresar"), ("work", "Surf + trabajo en remoto"), ("social", "Buen rollo en grupo"), ("nature", "Naturaleza y calma")]))}
+<button class="btn btn-orange" type="submit">{L("See my match", "Ver mi destino")}</button>
+</form>
+<div id="mres" class="mres" hidden aria-live="polite"></div>
+<script type="application/json" id="mdata">{_json.dumps(data, ensure_ascii=False)}</script>
+</section>
+<section class="split rule" id="enquire" hidden>
+<div class="pad dark"><p class="kicker orange-t">{L("Your proposal", "Tu propuesta")}</p><h2 class="big">{L("Want this trip?", "¿Quieres este viaje?")}</h2><p class="lead">{L("Leave your details: we already have your answers. No payment now.", "Déjanos tus datos: ya tenemos tus respuestas. Sin pagar nada ahora.")}</p>{mini()}</div>
+<div class="pad bl">{form("individual", f_gen(), L("Request my proposal", "Pedir mi propuesta"), '<input type="hidden" name="listingId" value=""><input type="hidden" name="people" value=""><input type="hidden" name="dates" value=""><input type="hidden" name="level" value=""><input type="hidden" name="groupType" value="">')}</div>
+</section>'''
+
+
+def match_cta():
+    return f'<section class="pad mcta"><p class="kicker">{L("Not sure where to go?", "¿No sabes adónde ir?")}</p><h2 class="big">{L("Find your surf trip<br>in <mark>30 seconds</mark>", "Encuentra tu surf trip<br>en <mark>30 segundos</mark>")}</h2><a class="btn btn-ink" href="{url("match")}">{L("Start the matcher", "Empezar")}</a></section>'
+
+
+EXTRA_PAGES["match"] = (match, "Surf Trip Matcher: find your surf trip in 30 seconds | SNAP", "Encuentra tu surf trip en 30 segundos | SNAP SURF TRIPS",
+    "Answer five questions and find the surf camp that fits you or your group: destination, dates, size and surf level.",
+    "Responde cinco preguntas y encuentra el surf camp que encaja contigo o con tu grupo: destino, fechas, tamaño y nivel de surf.", "Surf trip matcher", "Encuentra tu surf trip")
+SHARE.add("match")
