@@ -13,6 +13,9 @@
     a.setAttribute('href', p[0] + (p[0].indexOf('?') < 0 ? '?' : '&') + qs.join('&') + (p[1] ? '#' + p[1] : ''));
   });
 
+  var mb = document.querySelector('.menu-btn'), mn = document.getElementById('mainnav');
+  if (mb) mb.addEventListener('click', function () { var o = mn.classList.toggle('open'); mb.setAttribute('aria-expanded', o); });
+
   document.querySelectorAll('[data-pack]').forEach(function (a) {
     a.addEventListener('click', function () {
       var h = document.querySelector('input[name=packageId]'), n = document.querySelector('select[name=nights]');
