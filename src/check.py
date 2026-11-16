@@ -1,4 +1,4 @@
-# Prueba responsive: 20 páginas × 7 anchos (desbordes, zonas táctiles, imágenes). Uso: python3 src/check.py
+# Prueba responsive: todas las páginas × 7 anchos (desbordes, zonas táctiles, imágenes). Uso: python3 src/check.py
 import asyncio, pathlib
 from playwright.async_api import async_playwright
 root=pathlib.Path('/home/claude/site/dist/preview')

@@ -39,6 +39,7 @@ def L(en, es):
 PATHS = {
     "home": ("", "es/"),
     "sagres": ("surf-trips/sagres/", "es/viajes-surf/sagres/"),
+    "bali": ("surf-trips/bali/", "es/viajes-surf/bali/"),
     "groups": ("group-surf-trips/", "es/viajes-surf-grupos/"),
     "camps": ("for-surf-camps/", "es/para-surf-camps/"),
     "contact": ("contact/", "es/contacto/"),
@@ -113,6 +114,15 @@ def f_ind():
             + field(L("How many people?", "¿Cuántas personas?"), "people", "number", extra='min="1" max="19"')
             + field(L("Preferred dates", "Fechas preferidas"), "dates", extra=f'placeholder="{L("e.g. 10–17 May, or just June", "p. ej. 10–17 mayo, o solo junio")}"')
             + select(L("Nights", "Noches"), "nights", ["3", "5", "7", L("Other", "Otra")])
+            + select(L("Surf level", "Nivel de surf"), "level", levels())
+            + f'<label class="check full"><input type="checkbox" name="flexible"><span>{L("My dates are flexible", "Mis fechas son flexibles")}</span></label>')
+
+
+def f_bali():
+    return (field(L("Name", "Nombre"), "name", req=True) + field("Email", "email", "email", True)
+            + field(L("Phone / WhatsApp", "Teléfono / WhatsApp"), "phone", "tel") + field(L("Country", "País"), "country")
+            + field(L("How many people?", "¿Cuántas personas?"), "people", "number", extra='min="1" max="18"')
+            + field(L("Preferred dates", "Fechas preferidas"), "dates", extra=f'placeholder="{L("e.g. 10–24 May, or just spring", "p. ej. 10–24 mayo, o solo primavera")}"')
             + select(L("Surf level", "Nivel de surf"), "level", levels())
             + f'<label class="check full"><input type="checkbox" name="flexible"><span>{L("My dates are flexible", "Mis fechas son flexibles")}</span></label>')
 
@@ -295,6 +305,52 @@ def sagres():
 <section class="split rule" id="enquire">
 <div class="pad dark"><p class="kicker orange-t">{L("Enquire", "Solicitud")}</p><h2 class="big">{L("Tell us about your trip", "Cuéntanos tu viaje")}</h2><p class="lead">{L("No payment now. We check availability and come back with your proposal.", "Sin pagar nada ahora. Comprobamos la disponibilidad y te enviamos tu propuesta.")}</p><p><a href="{url("faq")}">{L("Questions? Read the FAQ", "¿Dudas? Lee las preguntas frecuentes")}</a></p>{mini()}</div>
 <div class="pad bl">{form("individual", f_ind(), L("Send my enquiry", "Enviar mi solicitud"), f'<input type="hidden" name="listingId" value="{LISTING}"><input type="hidden" name="packageId" value="">')}</div>
+</section>'''
+
+
+def bali():
+    # camps/nagara-bali: contrato firmado (Robert 16/11), 1–18 personas, todo el año.
+    # Sin nombre del partner ni datos que lo identifiquen (R-006), sin precios y sin fotos hasta tener permiso escrito.
+    return f'''
+<section class="pad rule">
+<p class="kicker">{L("Indonesia · Bali · Bukit Peninsula", "Indonesia · Bali · Península de Bukit")}</p>
+<h1 class="mega">{L("Surf &amp; work trip<br>to <mark>Bali</mark>", "Surf y trabajo<br>en <mark>Bali</mark>")}</h1>
+<p class="lead">{L("A small boutique stay with its own coworking space on the Bukit Peninsula, a short drive from the reef breaks around Uluwatu. Surf in the morning, work with fast wifi in the afternoon. For 1 to 18 people, all year round, quoted for your dates.",
+                    "Un hotel boutique pequeño con coworking propio en la península de Bukit, a pocos minutos de los arrecifes de Uluwatu. Surf por la mañana y trabajo con wifi rápido por la tarde. De 1 a 18 personas, todo el año, presupuestado para tus fechas.")}</p>
+</section>
+
+<section class="split rule">
+<div class="pad dark">
+<p class="kicker orange-t">{L("All year round", "Todo el año")}</p>
+<h2 class="big">{L("Warm water,<br>twelve months", "Agua cálida,<br>doce meses")}</h2>
+<p class="lead">{L("Open all year for 1 to 18 people: solo, with friends or as a small team. The Bukit is at its best in the dry season (April to October); in the wet season we point you to the breaks that work best.", "Abierto todo el año de 1 a 18 personas: solo, con amigos o en un equipo pequeño. El Bukit está en su mejor momento en la estación seca (abril a octubre); en la estación de lluvias te llevamos a las olas que mejor funcionan.")}</p>
+<a class="btn btn-orange" href="#enquire">{L("Get my proposal", "Pedir mi propuesta")}</a>
+</div>
+<div class="pad">
+<p class="kicker">{L("The stay", "El alojamiento")}</p>
+<h2 class="big">{L("Boutique stay with coworking", "Hotel boutique con coworking")}</h2>
+<p class="lead">{L("Only a handful of rooms, each with its own balcony or terrace. A pool to cool off after the session, a spa for tired shoulders and a coworking space built for getting real work done.",
+                    "Pocas habitaciones, cada una con su balcón o terraza. Piscina para refrescarse después de la sesión, spa para los hombros cansados y un coworking pensado para trabajar de verdad.")}</p>
+<ul class="facts">
+<li>Coworking</li><li>{L("Fast wifi", "Wifi rápido")}</li><li>{L("Swimming pool", "Piscina")}</li><li>{L("Spa &amp; massages", "Spa y masajes")}</li><li>{L("Breakfast", "Desayuno")}</li><li>{L("Balcony or terrace", "Balcón o terraza")}</li>
+</ul>
+</div>
+</section>
+
+<section class="pad rule">
+<div class="head"><h2 class="big">{L("The waves of the Bukit", "Las olas del Bukit")}</h2><p class="kicker">{L("Reef country", "Tierra de arrecifes")}</p></div>
+<div class="packs">
+<article><p class="kicker">~15 min</p><h3 class="h3">Balangan</h3><p>{L("Long, rippable lefts in front of a sandy beach. A favourite for a sunset session.", "Izquierdas largas y maniobrables frente a una playa de arena. La favorita para la sesión del atardecer.")}</p></article>
+<article><p class="kicker">~20 min</p><h3 class="h3">Padang Padang</h3><p>{L("Bali's most famous barrel on the big days, with a gentler inside section when it is smaller.", "El tubo más famoso de Bali en los días grandes, con una zona interior más amable cuando está pequeño.")}</p></article>
+<article><p class="kicker">~25 min</p><h3 class="h3">Bingin</h3><p>{L("Short, punchy lefts below the cliffs, framed by the warungs on the stairs.", "Izquierdas cortas y potentes bajo los acantilados, con los warungs colgados de las escaleras.")}</p></article>
+<article class="orange"><p class="kicker">{L("Your level", "Tu nivel")}</p><h3 class="h3">{L("Matched to you", "A tu medida")}</h3><p>{L("The Bukit is reef territory. Tell us your level and we will match spots and coaching to it.", "El Bukit es zona de arrecife. Cuéntanos tu nivel y elegimos los spots y las clases que te encajan.")}</p></article>
+</div>
+<p class="small">{L("Approximate driving times from the stay.", "Tiempos aproximados en coche desde el alojamiento.")} {disclaimer()} {L("Flights and airport transfers are not included.", "Vuelos y traslados del aeropuerto no incluidos.")}</p>
+</section>
+
+<section class="split rule" id="enquire">
+<div class="pad dark"><p class="kicker orange-t">{L("Enquire", "Solicitud")}</p><h2 class="big">{L("Plan your Bali trip", "Planea tu viaje a Bali")}</h2><p class="lead">{L("No payment now. We check availability and come back with your proposal.", "Sin pagar nada ahora. Comprobamos la disponibilidad y te enviamos tu propuesta.")}</p><p><a href="{url("faq")}">{L("Questions? Read the FAQ", "¿Dudas? Lee las preguntas frecuentes")}</a></p>{mini()}</div>
+<div class="pad bl">{form("individual", f_bali(), L("Send my enquiry", "Enviar mi solicitud"), '<input type="hidden" name="listingId" value="bali-bukit-01"><input type="hidden" name="packageId" value="">')}</div>
 </section>'''
 
 
@@ -520,6 +576,9 @@ PAGES = {
     "sagres": (sagres, "Surf Camp in Sagres, Algarve: surf & stay packages | SNAP", "Surf camp en Sagres (Algarve): packs de surf y alojamiento | SNAP",
                "Surf house with pool in Sagres, Portugal. Surf packages of 3, 5 and 7 nights with lessons and breakfast. Personalised proposal with no commitment.",
                "Surf house con piscina en Sagres (Portugal). Packs de surf de 3, 5 y 7 noches con clases y desayuno. Propuesta personalizada sin compromiso.", "Sagres", "Sagres"),
+    "bali": (bali, "Surf & Work Trip to Bali (Uluwatu): surf + coworking | SNAP", "Viaje de surf y trabajo remoto a Bali (Uluwatu) | SNAP",
+             "Surf and remote work on Bali's Bukit Peninsula, close to the Uluwatu reefs. Boutique stay with coworking, for 1 to 18 people, all year round.",
+             "Surf y trabajo remoto en la península de Bukit (Bali), cerca de los arrecifes de Uluwatu. Hotel boutique con coworking, de 1 a 18 personas, todo el año.", "Bali", "Bali"),
     "groups": (groups, "Group Surf Trips: schools, universities, clubs & companies | SNAP", "Viajes de surf para grupos, institutos y universidades | SNAP",
                "Group surf trips for schools, universities, Erasmus groups, clubs and companies. Closed proposal on request.",
                "Viajes de surf para institutos, universidades, grupos Erasmus, clubs y empresas. Propuesta cerrada a medida.", "Group surf trips", "Viajes de surf para grupos"),
@@ -567,6 +626,10 @@ def schema(key, title, desc):
                   "touristType": ["Surfers", "Beginners", "Groups"], "provider": {"@id": DOMAIN + "/#org"},
                   "itinerary": {"@type": "Place", "name": "Sagres, Algarve, Portugal", "address": {"@type": "PostalAddress", "addressLocality": "Sagres", "addressRegion": "Algarve", "addressCountry": "PT"}},
                   "image": DOMAIN + "/img/sagres-coast.jpg"})
+    if key == "bali":
+        g.append({"@type": "TouristTrip", "name": L("Surf & work trip to Bali", "Viaje de surf y trabajo remoto a Bali"), "description": desc,
+                  "touristType": ["Surfers", "Remote workers", "Small groups"], "provider": {"@id": DOMAIN + "/#org"},
+                  "itinerary": {"@type": "Place", "name": "Bukit Peninsula, Bali, Indonesia", "address": {"@type": "PostalAddress", "addressRegion": "Bali", "addressCountry": "ID"}}})
     return json.dumps({"@context": "https://schema.org", "@graph": g}, ensure_ascii=False)
 
 
@@ -632,7 +695,7 @@ def page(key):
 <main id="main">{crumb}{body}</main>
 <footer class="foot">
 <div><a class="logo" href="{url("home")}">{logo}</a><p class="small">{L("Surf trips around the world for travellers and groups.", "Viajes de surf por el mundo para viajeros y grupos.")}<br>{ORG["email"]} · {ORG["tel"]}</p>{social}</div>
-<nav aria-label="{L("Site", "Sitio")}"><a href="{url("trips")}">{L("Surf destinations", "Destinos de surf")}</a><a href="{url("sagres")}">{L("Surf trip to Sagres", "Viaje de surf a Sagres")}</a><a href="{url("groups")}">{L("Group surf trips", "Viajes de surf para grupos")}</a><a href="{url("camps")}">{L("For surf camps", "Para surf camps")}</a><a href="{url("guides")}">{L("Surf guides", "Guías de surf")}</a><a href="{url("faq")}">FAQ</a><a href="{url("contact")}">{L("Contact", "Contacto")}</a></nav>
+<nav aria-label="{L("Site", "Sitio")}"><a href="{url("trips")}">{L("Surf destinations", "Destinos de surf")}</a><a href="{url("sagres")}">{L("Surf trip to Sagres", "Viaje de surf a Sagres")}</a><a href="{url("bali")}">{L("Surf trip to Bali", "Viaje de surf a Bali")}</a><a href="{url("groups")}">{L("Group surf trips", "Viajes de surf para grupos")}</a><a href="{url("camps")}">{L("For surf camps", "Para surf camps")}</a><a href="{url("guides")}">{L("Surf guides", "Guías de surf")}</a><a href="{url("faq")}">FAQ</a><a href="{url("contact")}">{L("Contact", "Contacto")}</a></nav>
 <nav aria-label="Legal"><a href="{url("notice")}">{L("Legal notice", "Aviso legal")}</a><a href="{url("privacy")}">{L("Privacy policy", "Privacidad")}</a><a href="{url("cookies")}">{L("Cookie policy", "Cookies")}</a><a href="{url("terms")}">{L("Terms", "Condiciones")}</a>{cks}</nav>
 <p class="small legal-line">© {TODAY[:4]} SNAP SURF TRIPS · {L("A brand of", "Marca de")} {ORG["name"]} · NIF {ORG["nif"]}</p>
 </footer>
@@ -664,7 +727,7 @@ def llms():
 > SNAP SURF TRIPS is a commercial agent for surf camps and surf houses around the world (first destination: Sagres, Portugal; more coming). It presents their surf trips to individual travellers and for groups (schools 16+, universities, Erasmus, clubs, private groups, companies). Customers send one enquiry and receive one personalised proposal. An enquiry is not a booking.
 
 ## Key facts
-- Destination available: Sagres, Algarve, Portugal. Surf house with pool, private and shared rooms, breakfast included, own surf school. Open March to December.
+- Destinations: Bali, Indonesia (Bukit Peninsula, near Uluwatu: boutique stay with coworking, 1–18 people, all year). Sagres, Algarve, Portugal. Surf house with pool, private and shared rooms, breakfast included, own surf school. Open March to December.
 - Surf packages: 3 nights + 1 surf day; 5 nights + 2 surf days; 7 nights + 5 surf days (2 sessions of 1 h 30 a day, equipment, picnic and insurance). Tailor-made options.
 - Prices: no public price list. Every trip is quoted personally in a proposal, with no commitment.
 - Group surf trips: price always quoted on request. School groups from age 16, organised through the school.
@@ -674,6 +737,7 @@ def llms():
 
 ## Pages
 - [Surf trip to Sagres]({DOMAIN}/{PATHS["sagres"][0]}): accommodation, packages and enquiry form
+- [Surf & work trip to Bali]({DOMAIN}/{PATHS["bali"][0]}): boutique stay with coworking on the Bukit Peninsula (near Uluwatu), 1 to 18 people, all year round
 - [Group surf trips]({DOMAIN}/{PATHS["groups"][0]}): schools, universities, clubs, companies
 - [Surf destinations]({DOMAIN}/{PATHS["trips"][0]})
 - [End-of-year school surf trips (16+)]({DOMAIN}/{PATHS["school"][0]})
