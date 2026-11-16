@@ -1,1 +1,70 @@
-{"sagres-cliffs-van": [1000, 749], "sagres-coast": [1000, 573], "sagres-house-dinner": [598, 580], "sagres-house-dorm": [1000, 547], "sagres-house-pool": [819, 580], "sagres-house-room": [1000, 544], "sagres-house-yoga": [622, 933], "sagres-surf-group": [1000, 562], "sagres-surf-lesson": [1000, 562], "sagres-surf-wave": [1000, 562]}
+{
+ "sagres-cliffs-van": [
+  1000,
+  749
+ ],
+ "sagres-coast": [
+  1000,
+  573
+ ],
+ "sagres-house-dinner": [
+  598,
+  580
+ ],
+ "sagres-house-dorm": [
+  1000,
+  547
+ ],
+ "sagres-house-pool": [
+  819,
+  580
+ ],
+ "sagres-house-room": [
+  1000,
+  544
+ ],
+ "sagres-house-yoga": [
+  622,
+  933
+ ],
+ "sagres-surf-group": [
+  1000,
+  562
+ ],
+ "sagres-surf-lesson": [
+  1000,
+  562
+ ],
+ "sagres-surf-wave": [
+  1000,
+  562
+ ],
+ "bali-pool-palms": [
+  1000,
+  438
+ ],
+ "bali-pool-night": [
+  1000,
+  667
+ ],
+ "bali-cowork-desk": [
+  1000,
+  666
+ ],
+ "bali-room": [
+  1000,
+  666
+ ],
+ "bali-pool-lounger": [
+  1000,
+  666
+ ],
+ "bali-coffee": [
+  1000,
+  666
+ ],
+ "bali-terrace-coffee": [
+  1000,
+  667
+ ]
+}

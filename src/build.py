@@ -310,20 +310,22 @@ def sagres():
 
 def bali():
     # camps/partner-bali: contrato firmado (Robert 16/11), 1–18 personas, todo el año.
-    # Sin nombre del partner ni datos que lo identifiquen (R-006), sin precios y sin fotos hasta tener permiso escrito.
+    # Solo grupos +18. Sin nombre del partner ni datos que lo identifiquen (R-006) y sin precios. Fotos autorizadas por el partner (Robert 16/11), recortadas y renombradas (bali-*).
     return f'''
 <section class="pad rule">
 <p class="kicker">{L("Indonesia · Bali · Bukit Peninsula", "Indonesia · Bali · Península de Bukit")}</p>
 <h1 class="mega">{L("Surf &amp; work trip<br>to <mark>Bali</mark>", "Surf y trabajo<br>en <mark>Bali</mark>")}</h1>
-<p class="lead">{L("A small boutique stay with its own coworking space on the Bukit Peninsula, a short drive from the reef breaks around Uluwatu. Surf in the morning, work with fast wifi in the afternoon. For 1 to 18 people, all year round, quoted for your dates.",
-                    "Un hotel boutique pequeño con coworking propio en la península de Bukit, a pocos minutos de los arrecifes de Uluwatu. Surf por la mañana y trabajo con wifi rápido por la tarde. De 1 a 18 personas, todo el año, presupuestado para tus fechas.")}</p>
+<p class="lead">{L("A small boutique stay with its own coworking space on the Bukit Peninsula, a short drive from the reef breaks around Uluwatu. Surf in the morning, work with fast wifi in the afternoon. For adults (18+), from 1 to 18 people, all year round, quoted for your dates.",
+                    "Un hotel boutique pequeño con coworking propio en la península de Bukit, a pocos minutos de los arrecifes de Uluwatu. Surf por la mañana y trabajo con wifi rápido por la tarde. Para mayores de 18, de 1 a 18 personas, todo el año, presupuestado para tus fechas.")}</p>
 </section>
+
+{pic("bali-pool-palms", L("Tropical lagoon pool with palm trees and a thatched bale in Bali", "Piscina tropical con palmeras y un bale de paja en Bali"), "ph pano rule", True, "100vw")}
 
 <section class="split rule">
 <div class="pad dark">
 <p class="kicker orange-t">{L("All year round", "Todo el año")}</p>
 <h2 class="big">{L("Warm water,<br>twelve months", "Agua cálida,<br>doce meses")}</h2>
-<p class="lead">{L("Open all year for 1 to 18 people: solo, with friends or as a small team. The Bukit is at its best in the dry season (April to October); in the wet season we point you to the breaks that work best.", "Abierto todo el año de 1 a 18 personas: solo, con amigos o en un equipo pequeño. El Bukit está en su mejor momento en la estación seca (abril a octubre); en la estación de lluvias te llevamos a las olas que mejor funcionan.")}</p>
+<p class="lead">{L("Open all year for adults (18+), from 1 to 18 people: solo, with friends or as a small team. The Bukit is at its best in the dry season (April to October); in the wet season we point you to the breaks that work best.", "Abierto todo el año para mayores de 18, de 1 a 18 personas: solo, con amigos o en un equipo pequeño. El Bukit está en su mejor momento en la estación seca (abril a octubre); en la estación de lluvias te llevamos a las olas que mejor funcionan.")}</p>
 <a class="btn btn-orange" href="#enquire">{L("Get my proposal", "Pedir mi propuesta")}</a>
 </div>
 <div class="pad">
@@ -335,6 +337,15 @@ def bali():
 <li>Coworking</li><li>{L("Fast wifi", "Wifi rápido")}</li><li>{L("Swimming pool", "Piscina")}</li><li>{L("Spa &amp; massages", "Spa y masajes")}</li><li>{L("Breakfast", "Desayuno")}</li><li>{L("Balcony or terrace", "Balcón o terraza")}</li>
 </ul>
 </div>
+</section>
+
+<section class="gallery rule" aria-label="{L("Photos", "Fotos")}">
+{pic("bali-cowork-desk", L("Laptop on a wooden work bar, ready for an afternoon of remote work", "Portátil sobre una barra de madera, listo para una tarde de trabajo en remoto"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("bali-pool-night", L("Pool lit up at night between tropical gardens", "Piscina iluminada de noche entre jardines tropicales"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("bali-room", L("Bright double room opening onto the garden", "Habitación doble luminosa abierta al jardín"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("bali-pool-lounger", L("Floating day bed in the lagoon pool", "Cama de día flotante en la piscina"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("bali-coffee", L("Fresh espresso being prepared after the morning surf", "Espresso recién hecho después del surf de la mañana"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("bali-terrace-coffee", L("Coffee on a teak table by the window", "Café sobre una mesa de teca junto a la ventana"), sizes="(max-width:860px) 50vw, 33vw")}
 </section>
 
 <section class="pad rule">
@@ -629,7 +640,8 @@ def schema(key, title, desc):
     if key == "bali":
         g.append({"@type": "TouristTrip", "name": L("Surf & work trip to Bali", "Viaje de surf y trabajo remoto a Bali"), "description": desc,
                   "touristType": ["Surfers", "Remote workers", "Small groups"], "provider": {"@id": DOMAIN + "/#org"},
-                  "itinerary": {"@type": "Place", "name": "Bukit Peninsula, Bali, Indonesia", "address": {"@type": "PostalAddress", "addressRegion": "Bali", "addressCountry": "ID"}}})
+                  "itinerary": {"@type": "Place", "name": "Bukit Peninsula, Bali, Indonesia", "address": {"@type": "PostalAddress", "addressRegion": "Bali", "addressCountry": "ID"}},
+                  "image": DOMAIN + "/img/bali-pool-palms.jpg"})
     return json.dumps({"@context": "https://schema.org", "@graph": g}, ensure_ascii=False)
 
 

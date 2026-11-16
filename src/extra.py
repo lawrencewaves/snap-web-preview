@@ -1,7 +1,7 @@
 # SNAP · páginas de grupos por intención, índice de destinos, guías e Instagram.
 # Se ejecuta dentro de build.py (comparte L, url, pic, form, f_group, mini, LANG...). Solo datos verificados del CRM:
 # temporada de grupos mar–jul y 16 sep–dic · grupos desde 20 · menores desde 16 con el centro · packs de camps/sagres-sun-stay.
-# Bali (camps/partner-bali): 1–18 personas, todo el año, sin fotos hasta tener permiso escrito.
+# Bali (camps/partner-bali): mayores de 18, 1–18 personas, todo el año; fotos autorizadas (bali-*).
 
 EXTRA_PATHS = {
     "trips": ("surf-trips/", "es/viajes-surf/"),
@@ -113,7 +113,7 @@ def trips():
 <p class="lead">{L("Each destination is a surf camp or surf house we work with. Pick one and send one enquiry: you get one personalised proposal.", "Cada destino es un surf camp o surf house con el que trabajamos. Elige uno y envía una solicitud: recibes una propuesta personalizada.")}</p></section>
 <section class="pad dest">
 <a class="dcard" href="{url("sagres")}">{pic("sagres-coast", L("Beach and cliffs near Sagres", "Playa y acantilados cerca de Sagres"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Portugal · Algarve</span><span class="h2">Sagres</span><span>{L("Surf house with pool · 3, 5 and 7 nights →", "Surf house con piscina · 3, 5 y 7 noches →")}</span></a>
-<a class="dcard soon" href="{url("bali")}"><span class="kicker">Indonesia · Bali</span><span class="h2">Bali</span><span>{L("Surf + coworking near Uluwatu · 1 to 18 people · all year →", "Surf + coworking cerca de Uluwatu · de 1 a 18 personas · todo el año →")}</span></a>
+<a class="dcard" href="{url("bali")}">{pic("bali-pool-palms", L("Tropical pool with palm trees in Bali", "Piscina tropical con palmeras en Bali"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Indonesia · Bali</span><span class="h2">Bali</span><span>{L("Surf + coworking near Uluwatu · adults, 1 to 18 people · all year →", "Surf + coworking cerca de Uluwatu · +18, de 1 a 18 personas · todo el año →")}</span></a>
 <a class="dcard soon" href="{url("contact")}"><span class="kicker">{L("Coming soon", "Muy pronto")}</span><span class="h2">{L("New destinations", "Nuevos destinos")}</span><span>{L("We are adding new surf camps. Ask us where you would like to go →", "Estamos sumando nuevos surf camps. Dinos adónde te gustaría ir →")}</span></a>
 </section>'''
 
