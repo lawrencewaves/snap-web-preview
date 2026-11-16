@@ -13,6 +13,9 @@
     a.setAttribute('href', p[0] + (p[0].indexOf('?') < 0 ? '?' : '&') + qs.join('&') + (p[1] ? '#' + p[1] : ''));
   });
 
+  // contador propio sin cookies (solo en el servidor real)
+  if (!DEMO && navigator.sendBeacon) try { navigator.sendBeacon(B.api.replace('enquiry.php', 'hit.php'), JSON.stringify({ p: location.pathname, s: utm.utm_source || '', r: document.referrer })); } catch (e) {}
+
   var mb = document.querySelector('.menu-btn'), mn = document.getElementById('mainnav');
   if (mb) mb.addEventListener('click', function () { var o = mn.classList.toggle('open'); mb.setAttribute('aria-expanded', o); });
 
