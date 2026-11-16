@@ -46,3 +46,15 @@ for f in pub.rglob('index.html'):
         g = pub / u.lstrip('/')
         if not (g.is_file() or (g / 'index.html').is_file()): bad.append((str(f), 'roto', u))
 print('SEO:', len(list(pub.rglob('index.html'))), 'páginas ·', 'OK' if not bad else bad[:6])
+# hreflang recíproco, canonical propio e imagen social existente
+bad = []
+for f in pub.rglob('index.html'):
+    h = f.read_text(); me = '/' + str(f.parent.relative_to(pub)).replace('.', '').strip('/') + '/'
+    me = '/' if me == '//' else me
+    if not re.search(r'rel="canonical" href="[^"]*' + re.escape(me) + '"', h): bad.append((me, 'canonical'))
+    for lg, u in re.findall(r'hreflang="(en|es)" href="[^"]*?//[^/]+(/[^"]*)"', h):
+        g = pub / u.lstrip('/') / 'index.html'
+        if not g.is_file() or me not in g.read_text(): bad.append((me, 'hreflang', u))
+    og = re.search(r'og:image" content="[^"]*?/img/([^"]+)"', h)
+    if not og or not (pub / 'img' / og.group(1)).is_file(): bad.append((me, 'og'))
+print('Idiomas/canonical/OG:', 'OK' if not bad else bad[:5])

@@ -1,7 +1,7 @@
 """SNAP SURF TRIPS · genera la web estática EN + ES.
 Uso:  python3 -I src/build.py https://www.tu-dominio.com   → dist/public (producción) y dist/preview (para abrir en local)
 Todo el contenido vive aquí. Fotos, logos, CSS, JS y PHP en src/static. Ningún nombre de partner en ningún archivo."""
-import sys, os, json, shutil, pathlib, datetime
+import sys, os, re, json, shutil, pathlib, datetime
 
 SRC = pathlib.Path(__file__).resolve().parent
 DIST = SRC.parent / "dist"
@@ -14,9 +14,10 @@ import hashlib
 VER = hashlib.md5(b"".join((SRC / "static/assets" / f).read_bytes() for f in ("site.css", "site.js"))).hexdigest()[:8]
 ORG = {"name": "Associació Carving's Maresme", "nif": "G66143009",
        "addr": "C/ Mossèn Cinto Verdaguer 13-15, 08329 Teià (Barcelona), Spain",
-       "email": os.environ.get("SNAP_CONTACT_EMAIL", "info@TU-DOMINIO.com"), "tel": "+34 618 649 171"}
+       "email": os.environ.get("SNAP_CONTACT_EMAIL", "info@" + DOMAIN.split("//")[-1].removeprefix("www.")), "tel": "+34 618 649 171"}
 # Redes: pon la URL cuando exista la cuenta. Vacío = icono visible como «próximamente», sin enlace.
-SOCIAL = {"instagram": ""}
+SOCIAL = {"instagram": "https://www.instagram.com/snap_surftrips/"}
+IG_HANDLE = "@snap_surftrips"
 WA = "https://wa.me/34618649171"
 FLAG = {
     "en": '<svg viewBox="0 0 60 30" width="24" height="12" aria-hidden="true"><clipPath id="fl-a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="fl-b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#fl-a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#fl-b)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg>',
@@ -68,10 +69,16 @@ def url(key, anchor=""):
     return rel(path(key)) + anchor
 
 
+PRELOAD = []
+OG = {"bali": "og-bali.jpg"}
+
+
 def pic(name, alt, cls="ph", eager=False, sizes="(max-width:860px) 100vw, 50vw"):
     w, h = DIMS[name]
     load = 'fetchpriority="high"' if eager else 'loading="lazy" decoding="async"'
     b = rel("img/" + name + ".jpg")[:-4]
+    if eager and not PRELOAD:
+        PRELOAD.append(f'<link rel="preload" as="image" type="image/webp" imagesrcset="{b}-560.webp 640w, {b}.webp {w}w, {b}-1800.webp 1800w" imagesizes="{sizes}" fetchpriority="high">')
     return (f'<div class="{cls}"><picture><source type="image/webp" srcset="{b}-560.webp 640w, {b}.webp {w}w, {b}-1800.webp 1800w" sizes="{sizes}">'
             f'<img src="{b}.jpg" alt="{alt}" width="{w}" height="{h}" {load}></picture></div>')
 
@@ -576,7 +583,10 @@ def schema(key, title, desc):
 def page(key):
     fn, t_en, t_es, d_en, d_es, _, _ = PAGES[key]
     title, desc = L(t_en, t_es), L(d_en, d_es)
+    PRELOAD.clear()
     body = fn()
+    if key in SHARE:
+        body += share(key, title.split(" | ")[0])
     other = "es" if LANG == "en" else "en"
     canon = DOMAIN + "/" + path(key)
     NOINDEX = '<meta name="robots" content="noindex,nofollow">\n' if PREVIEW else ""
@@ -613,11 +623,16 @@ def page(key):
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="{canon}">
-<meta property="og:image" content="{DOMAIN}/img/og.jpg">
+<meta property="og:image" content="{DOMAIN}/img/{OG.get(key, "og.jpg")}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{title}">
 <meta property="og:locale" content="{L("en_GB", "es_ES")}">
 {NOINDEX}<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#F4F1EA">
 <link rel="icon" href="{rel("img/favicon.png")}">
+<link rel="apple-touch-icon" href="{rel("img/favicon.png")}">
+{"".join(PRELOAD)}
 <link rel="preload" href="{rel("assets/fonts/anton.woff2")}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{rel("assets/fonts/archivo.woff2")}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{rel("assets/site.css")}?v={VER}">
@@ -697,6 +712,15 @@ def build(out, preview):
     if out.exists():
         shutil.rmtree(out)
     shutil.copytree(SRC / "static", out)
+    # minificar con csso (fusiona reglas repetidas) y terser; si no están, se deja el original
+    import subprocess
+    nm = pathlib.Path(os.environ.get("SNAP_NODE_MODULES", "/tmp/fnt/node_modules/.bin"))
+    for tool, f, args in (("csso", "assets/site.css", ["--restructure-off"] if os.environ.get("SNAP_CSS_SAFE") else []), ("terser", "assets/site.js", ["-c", "-m"])):
+        if (nm / tool).exists():
+            r = subprocess.run([str(nm / tool), str(out / f), "-o", str(out / f), *args], capture_output=True, text=True)
+            if r.returncode:
+                print("aviso", tool, r.stderr[:200])
+    og_poster(out / "img/og-bali.jpg", "BALI", "SNAP SURF TRIPS · SURF & COWORKING")
     for lang in ("en", "es"):
         LANG = lang
         for key in PAGES:

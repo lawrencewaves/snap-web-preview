@@ -2,12 +2,16 @@
 Options -Indexes
 ErrorDocument 404 /404.html
 AddDefaultCharset UTF-8
+DirectoryIndex index.html
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
-# Forzar HTTPS (activar cuando el certificado SSL esté instalado: quitar las # de las dos líneas)
+# 1) Con SSL activo: quitar las # de estas dos líneas para forzar HTTPS
 # RewriteCond %{HTTPS} off
 # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# 2) Una sola versión del dominio (con www). Cambiar TU-DOMINIO y quitar las #
+# RewriteCond %{HTTP_HOST} ^TU-DOMINIO\.com$ [NC]
+# RewriteRule ^ https://www.TU-DOMINIO.com%{REQUEST_URI} [L,R=301]
 RewriteRule ^api/(config(\.sample)?\.php|data/) - [F,L]
 </IfModule>
 
@@ -16,8 +20,16 @@ Header always set X-Content-Type-Options "nosniff"
 Header always set X-Frame-Options "SAMEORIGIN"
 Header always set Referrer-Policy "strict-origin-when-cross-origin"
 Header always set Permissions-Policy "geolocation=(), camera=(), microphone=()"
-<FilesMatch "\.(woff2|webp|jpg|png|css|js)$">
-Header set Cache-Control "public, max-age=2592000"
+# Con SSL activo: quitar la # (obliga a HTTPS durante 1 año)
+# Header always set Strict-Transport-Security "max-age=31536000"
+<FilesMatch "\.(woff2|webp|jpg|png|svg)$">
+Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+<FilesMatch "\.(css|js)$">
+Header set Cache-Control "public, max-age=31536000"
+</FilesMatch>
+<FilesMatch "\.(html|xml|txt)$">
+Header set Cache-Control "no-cache"
 </FilesMatch>
 </IfModule>
 

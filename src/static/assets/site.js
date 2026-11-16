@@ -16,6 +16,10 @@
   // contador propio sin cookies (solo en el servidor real)
   if (!DEMO && navigator.sendBeacon) try { navigator.sendBeacon(B.api.replace('enquiry.php', 'hit.php'), JSON.stringify({ p: location.pathname, s: utm.utm_source || '', r: document.referrer })); } catch (e) {}
 
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () { var t = b.textContent; (navigator.clipboard ? navigator.clipboard.writeText(b.dataset.copy) : Promise.reject()).then(function () { b.textContent = '✓'; setTimeout(function () { b.textContent = t; }, 1600); }).catch(function () { prompt('', b.dataset.copy); }); });
+  });
+
   var mb = document.querySelector('.menu-btn'), mn = document.getElementById('mainnav');
   if (mb) mb.addEventListener('click', function () { var o = mn.classList.toggle('open'); mb.setAttribute('aria-expanded', o); });
 

@@ -119,10 +119,11 @@ def trips():
 
 def guide_page(key, h1, intro, sections, photo, alt):
     body = "".join(f"<h2>{h}</h2>{t}" for h, t in sections)
+    mins = max(2, round(len(re.findall(r"\w+", re.sub("<[^>]+>", " ", intro + body))) / 200))
     related = "".join(f'<a href="{url(k)}">{PAGES[k][1 if LANG == "en" else 2].split(" | ")[0]} →</a>' for k in GUIDES if k != key)
     return f'''
 <article>
-<section class="pad"><p class="kicker">{L("Guide", "Guía")} · {TODAY}</p><h1 class="big">{h1}</h1><p class="lead">{intro}</p></section>
+<section class="pad guide-head"><p class="kicker">{L("Guide", "Guía")} · {mins} min {L("read", "de lectura")}</p><h1 class="big">{h1}</h1><p class="lead drop">{intro}</p></section>
 {pic(photo, alt, "ph pano", True, "100vw")}
 <section class="pad prose">{body}
 <p><a class="btn btn-ink" href="{url("sagres", "#enquire")}">{L("Plan my surf trip", "Planear mi viaje de surf")}</a> <a class="btn" href="{url("groups")}">{L("Group proposal", "Propuesta de grupo")}</a></p>
@@ -181,7 +182,7 @@ def ig_block():
     if not ig:
         return ""
     tiles = "".join(f'<a href="{ig}" rel="noopener" class="igt">{pic(p, "", sizes="(max-width:860px) 33vw, 16vw")}</a>' for p in ("sagres-surf-wave", "sagres-house-pool", "sagres-surf-group", "sagres-coast", "sagres-house-yoga", "sagres-surf-lesson"))
-    return f'<section class="pad"><div class="head"><h2 class="big">{L("Follow the swell", "Síguenos")}</h2><a class="btn" href="{ig}" rel="noopener">@snapsurftrips · Instagram</a></div><div class="igrid">{tiles}</div></section>'
+    return f'<section class="pad"><div class="head"><h2 class="big">{L("Follow the swell", "Síguenos")}</h2><a class="btn" href="{ig}" rel="noopener">{IG_HANDLE} · Instagram</a></div><div class="igrid">{tiles}</div></section>'
 
 
 EXTRA_PAGES = {
@@ -257,3 +258,28 @@ def home_more():
 EXTRA_PAGES["bali"] = (bali, "Surf Trip to Bali: Surf & Coworking Hotel | SNAP", "Viaje de surf a Bali: hotel de surf y coworking | SNAP",
     "Surf trip to Bali: boutique surf and coworking hotel in the Uluwatu area, open all year, for travellers and small groups up to 18.",
     "Viaje de surf a Bali: hotel boutique de surf y coworking en la zona de Uluwatu, abierto todo el año, para viajeros y grupos de hasta 18.", "Bali", "Bali")
+
+
+# ---------- compartir (sin scripts de terceros) y cartel OG ----------
+SHARE = {"sagres", "bali", "school", "uni", "team", *GUIDES}
+
+
+def share(key, title):
+    from urllib.parse import quote
+    u = DOMAIN + "/" + path(key)
+    q, qt = quote(u, safe=""), quote(title + " " + u, safe="")
+    return f'''<section class="pad share" aria-label="{L("Share", "Compartir")}"><p class="kicker">{L("Share this trip with your crew", "Comparte este viaje con tu grupo")}</p>
+<div class="row"><a class="btn sm" href="https://wa.me/?text={qt}" rel="noopener">WhatsApp</a><a class="btn sm" href="https://www.linkedin.com/sharing/share-offsite/?url={q}" rel="noopener">LinkedIn</a><a class="btn sm" href="https://twitter.com/intent/tweet?url={q}&amp;text={quote(title, safe="")}" rel="noopener">X</a><button class="btn sm" type="button" data-copy="{u}">{L("Copy link", "Copiar enlace")}</button></div></section>'''
+
+
+def og_poster(dest, word, sub):
+    from PIL import Image, ImageDraw, ImageFont
+    im = Image.new("RGB", (1200, 630)); d = ImageDraw.Draw(im)
+    for y in range(630):
+        k = y / 630; d.line([(0, y), (1200, y)], fill=(int(14 + 8 * k), int(42 + 30 * k), int(58 + 34 * k)))
+    d.ellipse((760, 70, 1100, 410), fill=(255, 90, 31))
+    f = SRC / "anton.ttf"
+    big = ImageFont.truetype(str(f), 260) if f.exists() else ImageFont.load_default()
+    small = ImageFont.truetype(str(f), 40) if f.exists() else ImageFont.load_default()
+    d.text((70, 250), word, font=big, fill=(244, 241, 234)); d.text((76, 548), sub, font=small, fill=(244, 241, 234))
+    im.save(dest, quality=85)

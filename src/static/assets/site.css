@@ -348,3 +348,7 @@ dialog[open]~.wa-fab{display:none}
 .poster .ps{position:relative;z-index:1;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-top:12px}
 @media (max-width:860px){.poster.wide{margin:0 18px}}
 @media (min-width:861px){.cards:has(>article:nth-child(4):last-child){grid-template-columns:repeat(2,1fr)}}
+/* v0.9 · revista: capitular, compartir */
+.drop::first-letter{float:left;font:400 4.2em/.82 Anton,sans-serif;margin:.06em .1em 0 0;color:var(--orange)}
+.share{padding-top:0;gap:14px}
+.share .btn{background:transparent}
