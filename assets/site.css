@@ -146,3 +146,9 @@ h1.kicker{font-family:Archivo,sans-serif}
 mark{display:inline-block;line-height:1;padding:.03em .1em 0;margin-top:.05em}
 .faq{max-width:none}
 .faq details{max-width:980px}
+
+/* v0.5 · página enmarcada (máx. 1320 px): las fotos no se estiran en monitores grandes */
+html{background:#E9E5DB}
+body{max-width:1320px;margin:0 auto;border-left:var(--line);border-right:var(--line);min-height:100vh}
+.ph img{image-rendering:auto}
+@media (max-width:1320px){body{border:0}}
