@@ -3,7 +3,7 @@
 // Reenvía los emails que fallaron y manda «[WEB-ENQ-RESUMEN]» con las solicitudes de 48 h para conciliar con el CRM.
 declare(strict_types=1);
 $cfg = require __DIR__ . '/config.php';
-if (PHP_SAPI !== 'cli' && !hash_equals((string)$cfg['cronKey'], (string)($_GET['key'] ?? ''))) { http_response_code(403); exit; }
+if (PHP_SAPI !== 'cli' && (str_starts_with((string)$cfg['cronKey'], 'CAMBIAR') || !hash_equals((string)$cfg['cronKey'], (string)($_GET['key'] ?? '')))) { http_response_code(403); exit; }
 
 $db = new PDO('sqlite:' . $cfg['db']);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

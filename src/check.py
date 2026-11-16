@@ -18,7 +18,7 @@ async def main():
                 await pg.evaluate("document.querySelectorAll('img').forEach(i=>i.loading='eager')"); await pg.evaluate("document.querySelectorAll('.rv').forEach(e=>e.classList.add('in'))"); await pg.wait_for_timeout(150)
                 r=await pg.evaluate(CHK)
                 if r['sw']>r['W'] or r['o'] or r['small'] or r['img']: bad.append((u,r))
-            print(w,'px →','OK (20 páginas)' if not bad else bad[:3]); await pg.close()
+            print(w,'px →',f'OK ({len(pages)} páginas)' if not bad else bad[:3]); await pg.close()
         pg = await b.new_page(viewport={"width":390,"height":844})
         await pg.goto("file://"+str(root/"es/viajes-surf/sagres/index.html"), wait_until="load")
         await pg.screenshot(path="/tmp/m-top.jpg", type="jpeg", quality=75)
@@ -32,3 +32,17 @@ async def main():
         await pg2.screenshot(path="/tmp/d-foot.jpg", type="jpeg", quality=80)
         await b.close()
 asyncio.run(main())
+
+# SEO estático sobre dist/public: 1 H1, JSON-LD válido, enlaces internos, longitud de títulos y descripciones
+import re, json as _j
+pub = pathlib.Path('/home/claude/site/dist/public'); bad = []
+for f in pub.rglob('index.html'):
+    h = f.read_text()
+    for m in re.findall(r'<script type="application/ld\+json">(.*?)</script>', h, re.S): _j.loads(m)
+    if h.count('<h1') != 1: bad.append((str(f), 'h1', h.count('<h1')))
+    t = re.search(r'<title>(.*?)</title>', h).group(1).replace('&amp;', '&'); d = re.search(r'name="description" content="(.*?)"', h).group(1)
+    if len(t) > 65 or len(d) > 160: bad.append((str(f.parent.relative_to(pub)), len(t), len(d)))
+    for u in re.findall(r'href="(/[^"#?]*)', h):
+        g = pub / u.lstrip('/')
+        if not (g.is_file() or (g / 'index.html').is_file()): bad.append((str(f), 'roto', u))
+print('SEO:', len(list(pub.rglob('index.html'))), 'páginas ·', 'OK' if not bad else bad[:6])
