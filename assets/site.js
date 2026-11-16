@@ -16,6 +16,12 @@
   var mb = document.querySelector('.menu-btn'), mn = document.getElementById('mainnav');
   if (mb) mb.addEventListener('click', function () { var o = mn.classList.toggle('open'); mb.setAttribute('aria-expanded', o); });
 
+  // aparición suave al hacer scroll (sin efecto si el usuario pide menos movimiento)
+  if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('main > section:not(.hero):not(.ticker), .three > *, .packs article, .gallery .ph').forEach(function (el) { el.classList.add('rv'); io.observe(el); });
+  }
+
   document.querySelectorAll('[data-pack]').forEach(function (a) {
     a.addEventListener('click', function () {
       var h = document.querySelector('input[name=packageId]'), n = document.querySelector('select[name=nights]');
