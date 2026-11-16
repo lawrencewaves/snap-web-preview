@@ -298,3 +298,12 @@ dialog{border:0;border-radius:var(--r);overflow:hidden}
 .ph picture{position:absolute;inset:0}
 .ph img{width:100%;height:100%;object-fit:cover}
 .feature .ph.pano{margin:0}
+/* formulario: dos tarjetas alineadas arriba, la oscura se queda fija al hacer scroll */
+#enquire.split{align-items:start;padding-top:var(--gap);padding-bottom:clamp(40px,6vw,80px)}
+#enquire>.pad{border-radius:var(--r);padding:clamp(28px,4vw,56px)!important}
+#enquire>.pad:first-child{position:sticky;top:96px}
+#enquire>.pad:last-child{background:var(--sand)}
+#enquire>.pad:first-child:not(.dark){background:var(--ink);color:var(--paper)}
+#enquire>.pad:first-child:not(.dark) a{color:var(--paper)}
+.enq{align-items:end}
+@media (max-width:860px){#enquire>.pad:first-child{position:static}}
