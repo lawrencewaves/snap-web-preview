@@ -1,0 +1,24 @@
+SNAP SURF TRIPS · web v0.5 (EN + ES) · 12/11/2026
+
+VER EN TU ORDENADOR
+  Abre dist/preview/index.html con doble clic (español: dist/preview/es/index.html).
+  En local los formularios están en modo demo: enseñan el popup pero no envían nada.
+
+SUBIR A DINAHOSTING
+  0. Cuando tengas dominio, hay que regenerar la web con él (canonical, hreflang, sitemap, datos estructurados):
+     python3 src/build.py https://www.TU-DOMINIO.com      (o pídeselo a Claude)
+  1. Sube el CONTENIDO de dist/public/ a la carpeta www del hosting (incluido el archivo oculto .htaccess).
+  2. En api/, copia config.sample.php como config.php y rellena «from» (una dirección del dominio),
+     «salt» y «cronKey» (dos textos largos aleatorios).
+  3. Comprueba que api/data/ tiene permiso de escritura y que https://TU-DOMINIO/api/data/ da error 403.
+  4. Activa el SSL en el panel y quita las dos # de «Forzar HTTPS» en .htaccess.
+  5. Tarea programada diaria en el panel: php api/summary.php
+  6. Prueba real: envía una solicitud; debe salir el popup y llegar «[WEB-ENQ] …» a snapsurftrips@.
+  7. Da de alta el dominio en Google Search Console y envía /sitemap.xml.
+
+ANTES DE PUBLICAR (legal)
+  - Rellenar en el aviso legal el registro y número de inscripción de la asociación.
+  - Completar con el asesor las condiciones de reserva, pago y cancelación (marcadas entre corchetes).
+
+CAMBIAR TEXTOS O ACTIVAR ANALÍTICA
+  Todo está en src/build.py. GA_ID vacío = la web no usa cookies ni muestra banner.
