@@ -598,7 +598,7 @@ def page(key):
         for lg, name in (("en", "English"), ("es", "Español")))
     langsw = f'<nav class="lang" aria-label="{L("Language", "Idioma")}">{langs}</nav>'
     ig = SOCIAL["instagram"]
-    ig_html = (f'<a href="{ig}" rel="noopener" aria-label="Instagram">{ICON["instagram"]}</a>' if ig else
+    ig_html = (f'<a href="{ig}" target="_blank" rel="noopener" aria-label="Instagram ({L("opens in a new tab", "se abre en una pestaña nueva")})">{ICON["instagram"]}</a>' if ig else
                f'<span class="soon" role="img" aria-label="Instagram ({L("coming soon", "próximamente")})" title="Instagram · {L("coming soon", "próximamente")}">{ICON["instagram"]}</span>')
     social = f'<div class="social">{ig_html}<a href="{WA}" rel="noopener" aria-label="WhatsApp">{ICON["whatsapp"]}</a></div>'
     cr = crumbs(key)

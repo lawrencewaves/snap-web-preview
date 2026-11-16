@@ -181,8 +181,8 @@ def ig_block():
     ig = SOCIAL["instagram"]
     if not ig:
         return ""
-    tiles = "".join(f'<a href="{ig}" rel="noopener" class="igt">{pic(p, "", sizes="(max-width:860px) 33vw, 16vw")}</a>' for p in ("sagres-surf-wave", "sagres-house-pool", "sagres-surf-group", "sagres-coast", "sagres-house-yoga", "sagres-surf-lesson"))
-    return f'<section class="pad"><div class="head"><h2 class="big">{L("Follow the swell", "Síguenos")}</h2><a class="btn" href="{ig}" rel="noopener">{IG_HANDLE} · Instagram</a></div><div class="igrid">{tiles}</div></section>'
+    tiles = "".join(f'<a href="{ig}" target="_blank" rel="noopener" class="igt">{pic(p, "", sizes="(max-width:860px) 33vw, 16vw")}</a>' for p in ("sagres-surf-wave", "sagres-house-pool", "sagres-surf-group", "sagres-coast", "sagres-house-yoga", "sagres-surf-lesson"))
+    return f'<section class="pad"><div class="head"><h2 class="big">{L("Follow the swell", "Síguenos")}</h2><a class="btn" href="{ig}" target="_blank" rel="noopener">{IG_HANDLE} · Instagram</a></div><div class="igrid">{tiles}</div></section>'
 
 
 EXTRA_PAGES = {
