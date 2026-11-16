@@ -335,3 +335,16 @@ dialog[open]~.wa-fab{display:none}
 .igrid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;width:100%}
 .igrid .ph{aspect-ratio:1}
 @media (max-width:860px){.igrid{grid-template-columns:repeat(3,1fr)}}
+/* cartel gráfico (destinos sin fotos autorizadas todavía) */
+.poster{position:relative;overflow:hidden;border-radius:var(--r);background:linear-gradient(180deg,#0E2A3A 0%,#12465C 58%,#1C2B33 100%);color:var(--paper);display:flex;flex-direction:column;justify-content:flex-end;padding:clamp(20px,3vw,40px);min-height:300px;aspect-ratio:4/3}
+.poster.wide{aspect-ratio:auto;min-height:clamp(240px,34vw,460px);margin:0 clamp(18px,4vw,56px)}
+.poster.tall{aspect-ratio:auto;min-height:clamp(380px,62vh,680px)}
+.poster.alt{background:linear-gradient(180deg,#FF5A1F 0%,#E8461A 55%,#B9330F 100%);color:var(--ink)}
+.poster .sun{position:absolute;width:38%;aspect-ratio:1;border-radius:50%;background:var(--orange);right:8%;top:12%;opacity:.95}
+.poster.alt .sun{background:var(--paper);opacity:.9}
+.poster::after{content:"";position:absolute;left:0;right:0;bottom:0;height:42%;background:repeating-linear-gradient(180deg,transparent 0 14px,rgba(244,241,234,.08) 14px 16px)}
+.poster .pw{position:relative;z-index:1;font:400 clamp(72px,14vw,220px)/.85 Anton,sans-serif;letter-spacing:-.01em}
+.poster.card .pw{font-size:clamp(64px,9vw,140px)}
+.poster .ps{position:relative;z-index:1;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-top:12px}
+@media (max-width:860px){.poster.wide{margin:0 18px}}
+@media (min-width:861px){.cards:has(>article:nth-child(4):last-child){grid-template-columns:repeat(2,1fr)}}
