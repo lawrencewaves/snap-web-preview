@@ -168,10 +168,10 @@ def faqs():
          L("The 3-night package includes 3 breakfasts, 1 day of surf and transport to the spot. The 5-night package includes 5 breakfasts, 2 days of surf and transport. The 7-night package includes 7 breakfasts, 5 days of surf with 2 sessions of 1 h 30 a day, transport, equipment, picnic and insurance. Flights and airport transfers are not part of the packages.",
            "El pack de 3 noches incluye 3 desayunos, 1 día de surf y transporte al spot. El de 5 noches, 5 desayunos, 2 días de surf y transporte. El de 7 noches, 7 desayunos, 5 días de surf con 2 sesiones de 1 h 30 al día, transporte, material, picnic y seguro. Los vuelos y los traslados desde el aeropuerto no forman parte de los packs.")),
         (L("When can I go?", "¿Cuándo puedo ir?"),
-         L("The surf house in Sagres is open from March to December.", "La surf house de Sagres abre de marzo a diciembre.")),
+         L("Sagres: the surf house is open from March to December. Bali: open all year.", "Sagres: la surf house abre de marzo a diciembre. Bali: abierto todo el año.")),
         (L("Where exactly is the accommodation?", "¿Dónde está exactamente el alojamiento?"),
-         L("In Sagres, in the south-west of the Algarve, Portugal. You receive the exact details together with your proposal and booking confirmation.",
-           "En Sagres, en el suroeste del Algarve (Portugal). Recibes los datos exactos junto con tu propuesta y la confirmación de la reserva.")),
+         L("In the destination you choose: Sagres, in the Algarve (Portugal), or the Bukit peninsula in Bali (Indonesia). You receive the exact details together with your proposal and booking confirmation.",
+           "En el destino que elijas: Sagres, en el Algarve (Portugal), o la península de Bukit en Bali (Indonesia). Recibes los datos exactos junto con tu propuesta y la confirmación de la reserva.")),
         (L("Do you organise surf trips for groups?", "¿Organizáis viajes de surf para grupos?"),
          L("Yes. Together with the surf camp we prepare closed proposals for schools, universities and Erasmus groups, clubs and associations, private groups and companies. Group prices are always quoted on request. School groups are for students aged 16 and over and are organised through the school.",
            "Sí. Junto con el surf camp preparamos propuestas cerradas para institutos y colegios, universidades y grupos Erasmus, clubs y asociaciones, grupos privados y empresas. El precio para grupos siempre se presupuesta a medida. Los grupos escolares son para alumnos de 16 años o más y se organizan a través del centro.")),
@@ -194,7 +194,7 @@ def home():
 {pic("sagres-surf-wave", L("Surfer riding a wave in the Algarve", "Surfista cogiendo una ola en el Algarve"), "ph hero-ph", True)}
 </section>
 
-<section class="ticker" aria-hidden="true"><div>{L("<span>Surf trips</span><span>Surf camps</span><span>Surf houses</span><span>Group trips</span><span>Sagres</span><span>Coming soon: more destinations</span>","<span>Viajes de surf</span><span>Surf camps</span><span>Surf houses</span><span>Grupos</span><span>Sagres</span><span>Pronto: más destinos</span>")}{L("<span>Surf trips</span><span>Surf camps</span><span>Surf houses</span><span>Group trips</span><span>Sagres</span><span>Coming soon: more destinations</span>","<span>Viajes de surf</span><span>Surf camps</span><span>Surf houses</span><span>Grupos</span><span>Sagres</span><span>Pronto: más destinos</span>")}</div></section>
+<section class="ticker" aria-hidden="true"><div>{L("<span>Surf trips</span><span>Surf camps</span><span>Surf houses</span><span>Group trips</span><span>Sagres</span><span>Bali</span><span>Coming soon: more destinations</span>","<span>Viajes de surf</span><span>Surf camps</span><span>Surf houses</span><span>Grupos</span><span>Sagres</span><span>Bali</span><span>Pronto: más destinos</span>")}{L("<span>Surf trips</span><span>Surf camps</span><span>Surf houses</span><span>Group trips</span><span>Sagres</span><span>Bali</span><span>Coming soon: more destinations</span>","<span>Viajes de surf</span><span>Surf camps</span><span>Surf houses</span><span>Grupos</span><span>Sagres</span><span>Bali</span><span>Pronto: más destinos</span>")}</div></section>
 
 <section class="three rule">
 <a href="{url("sagres")}"><span class="kicker">A /</span><span class="h3">{L("I want to surf", "Quiero surfear")}</span><span>{L("Solo, as a couple or with friends. Surf packages of 3, 5 and 7 nights. →", "Por tu cuenta, en pareja o con amigos. Packs de surf de 3, 5 y 7 noches. →")}</span></a>
@@ -209,7 +209,7 @@ def home():
 <div class="feature-meta"><span class="h2">Sagres</span><span class="kicker">Portugal · Algarve</span></div>
 <p>{L("Surf house with pool · surf packages of 3, 5 and 7 nights", "Surf house con piscina · packs de surf de 3, 5 y 7 noches")}</p>
 </a>
-<p class="small">{L("More destinations are on the way.", "Pronto, más destinos.")}</p>
+{home_more()}
 </section>
 
 <section class="split dark rule">
@@ -562,6 +562,9 @@ def schema(key, title, desc):
     if key in GUIDES:
         g.append({"@type": "Article", "headline": title.split(" | ")[0], "description": desc, "inLanguage": LANG, "datePublished": TODAY, "dateModified": TODAY,
                   "author": {"@id": DOMAIN + "/#org"}, "publisher": {"@id": DOMAIN + "/#org"}, "image": DOMAIN + "/img/og.jpg", "mainEntityOfPage": DOMAIN + "/" + path(key)})
+    if key == "bali":
+        g.append({"@type": "TouristTrip", "name": L("Surf trip to Bali", "Viaje de surf a Bali"), "description": desc, "touristType": ["Surfers", "Remote workers", "Small groups"], "provider": {"@id": DOMAIN + "/#org"},
+                  "itinerary": {"@type": "Place", "name": "Bukit peninsula, Bali, Indonesia", "address": {"@type": "PostalAddress", "addressRegion": "Bali", "addressCountry": "ID"}}})
     if key == "sagres":
         g.append({"@type": "TouristTrip", "name": L("Surf trip to Sagres, Algarve", "Viaje de surf a Sagres, Algarve"), "description": desc,
                   "touristType": ["Surfers", "Beginners", "Groups"], "provider": {"@id": DOMAIN + "/#org"},
@@ -664,6 +667,7 @@ def llms():
 > SNAP SURF TRIPS is a commercial agent for surf camps and surf houses around the world (first destination: Sagres, Portugal; more coming). It presents their surf trips to individual travellers and for groups (schools 16+, universities, Erasmus, clubs, private groups, companies). Customers send one enquiry and receive one personalised proposal. An enquiry is not a booking.
 
 ## Key facts
+- Destination: Bali (Indonesia), Bukit peninsula / Uluwatu area. Boutique surf & coworking hotel with pool, breakfast, spa. Open all year; travellers and small groups up to 18; adults only.
 - Destination available: Sagres, Algarve, Portugal. Surf house with pool, private and shared rooms, breakfast included, own surf school. Open March to December.
 - Surf packages: 3 nights + 1 surf day; 5 nights + 2 surf days; 7 nights + 5 surf days (2 sessions of 1 h 30 a day, equipment, picnic and insurance). Tailor-made options.
 - Prices: no public price list. Every trip is quoted personally in a proposal, with no commitment.

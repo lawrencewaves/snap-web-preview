@@ -112,6 +112,7 @@ def trips():
 <p class="lead">{L("Each destination is a surf camp or surf house we work with. Pick one and send one enquiry: you get one personalised proposal.", "Cada destino es un surf camp o surf house con el que trabajamos. Elige uno y envía una solicitud: recibes una propuesta personalizada.")}</p></section>
 <section class="pad dest">
 <a class="dcard" href="{url("sagres")}">{pic("sagres-coast", L("Beach and cliffs near Sagres", "Playa y acantilados cerca de Sagres"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Portugal · Algarve</span><span class="h2">Sagres</span><span>{L("Surf house with pool · 3, 5 and 7 nights →", "Surf house con piscina · 3, 5 y 7 noches →")}</span></a>
+<a class="dcard" href="{url("bali")}">{poster("BALI", "Uluwatu · Bukit", "card")}<span class="kicker">Indonesia · Bali</span><span class="h2">Bali</span><span>{L("Surf &amp; coworking hotel · all year · up to 18 →", "Hotel de surf y coworking · todo el año · hasta 18 →")}</span></a>
 <a class="dcard soon" href="{url("contact")}"><span class="kicker">{L("Coming soon", "Muy pronto")}</span><span class="h2">{L("New destinations", "Nuevos destinos")}</span><span>{L("We are adding new surf camps. Ask us where you would like to go →", "Estamos sumando nuevos surf camps. Dinos adónde te gustaría ir →")}</span></a>
 </section>'''
 
@@ -185,7 +186,7 @@ def ig_block():
 
 EXTRA_PAGES = {
     "trips": (trips, "Surf Trips & Surf Camp Destinations | SNAP SURF TRIPS", "Viajes de surf y destinos de surf camp | SNAP SURF TRIPS",
-              "Surf camp and surf house destinations for travellers and groups. Starting in Sagres, Portugal, with new destinations coming.", "Destinos de surf camp y surf house para viajeros y grupos. Empezamos en Sagres (Portugal) y pronto habrá más.", "Surf trips", "Viajes de surf"),
+              "Surf camp destinations for travellers and groups: Sagres in Portugal and Bali in Indonesia, with new destinations coming.", "Destinos de surf camp para viajeros y grupos: Sagres (Portugal) y Bali (Indonesia), y pronto habrá más.", "Surf trips", "Viajes de surf"),
     "school": (school, "End-of-Year School Surf Trips (16+) | SNAP SURF TRIPS", "Viajes de fin de curso de surf (16+) | SNAP SURF TRIPS",
                "End-of-year surf trips to Sagres for school groups aged 16+, organised with the school. Closed proposal on request.", "Viajes de fin de curso de surf a Sagres para grupos escolares de 16+ años, organizados con el centro. Propuesta cerrada a medida.", "School trips", "Fin de curso"),
     "uni": (uni, "University & Erasmus Surf Trips | SNAP SURF TRIPS", "Viajes de surf para universidades y Erasmus | SNAP",
@@ -201,3 +202,58 @@ EXTRA_PAGES = {
     "g_first": (g_first, "Your First Surf Trip: What to Expect | SNAP SURF TRIPS", "Tu primer viaje de surf: qué esperar | SNAP SURF TRIPS",
                 "Never surfed? What a first surf week looks like: lessons on the sand, sessions of 1 h 30, safety and progress.", "¿Nunca has surfeado? Así es una primera semana de surf: clases en la arena, sesiones de 1 h 30, seguridad y progreso.", "First surf trip", "Primer viaje de surf"),
 }
+
+
+# ---------- Bali (camps/partner-bali · listing bali-bukit-01) ----------
+# Sin nombre, sin Instagram y sin fotos del partner hasta tener permiso escrito (R-006 + ficha del CRM). Cartel gráfico propio.
+EXTRA_PATHS["bali"] = ("surf-trips/bali/", "es/viajes-surf/bali/")
+PARENT["bali"] = "trips"
+
+
+def poster(word, sub, cls=""):
+    return f'<div class="poster {cls}" role="img" aria-label="{word} · {sub}"><span class="sun"></span><span class="pw">{word}</span><span class="ps">{sub}</span></div>'
+
+
+def bali():
+    facts = L(["Swimming pool", "Breakfast included", "Coworking with fast wifi", "Spa &amp; massages", "Rooms with balcony or terrace"],
+              ["Piscina", "Desayuno incluido", "Coworking con wifi rápido", "Spa y masajes", "Habitaciones con balcón o terraza"])
+    return f'''
+<section class="pad rule">
+<p class="kicker">Indonesia · Bali · {L("Bukit peninsula", "Península de Bukit")}</p>
+<h1 class="mega">{L("Surf trip<br>to <mark>Bali</mark>", "Viaje de surf<br>a <mark>Bali</mark>")}</h1>
+<p class="lead">{L("A small boutique surf &amp; coworking hotel on the Bukit peninsula, in the Uluwatu area: surf in the morning, work or rest in the afternoon. Open all year, for travellers and small groups up to 18.",
+                    "Un pequeño hotel boutique de surf y coworking en la península de Bukit, en la zona de Uluwatu: surf por la mañana, trabajo o descanso por la tarde. Abierto todo el año, para viajeros y grupos pequeños de hasta 18 personas.")}</p>
+</section>
+{poster("BALI", L("Uluwatu · Bukit", "Uluwatu · Bukit"), "wide")}
+<section class="split rule">
+<div class="pad">
+<p class="kicker">{L("The stay", "El alojamiento")}</p>
+<h2 class="big">{L("Surf &amp; remote work", "Surf y trabajo en remoto")}</h2>
+<p class="lead">{L("A boutique hotel with few rooms, personal service and a coworking space. The surf spots of the Uluwatu area, like Balangan, Padang Padang and Bingin, are a short drive away. Bali airport is about 30 minutes by car.",
+                    "Un hotel boutique de pocas habitaciones, trato cercano y espacio coworking. Los spots de la zona de Uluwatu, como Balangan, Padang Padang y Bingin, están a pocos minutos en coche. El aeropuerto de Bali queda a unos 30 minutos.")}</p>
+<ul class="facts">{"".join(f"<li>{x}</li>" for x in facts)}</ul>
+<a class="btn btn-orange" href="#enquire">{L("Get my proposal", "Pedir mi propuesta")}</a>
+</div>
+{poster(L("SURF", "SURF"), L("Balangan · Padang Padang · Bingin", "Balangan · Padang Padang · Bingin"), "tall alt")}
+</section>
+{cards([
+  (L("Who it is for", "Para quién"), L("<p>Surfers who want to combine waves and remote work, friends and small groups of up to 18 people. Adults only.</p>", "<p>Surfistas que quieren combinar olas y trabajo en remoto, amigos y grupos pequeños de hasta 18 personas. Solo adultos.</p>")),
+  (L("When to go", "Cuándo ir"), L("<p>Open all year. Tell us your dates and we check availability.</p>", "<p>Abierto todo el año. Dinos tus fechas y comprobamos la disponibilidad.</p>")),
+  (L("Surfing", "El surf"), L("<p>Tell us your level. Surf options for your trip are confirmed in your personalised proposal.</p>", "<p>Cuéntanos tu nivel. Las opciones de surf de tu viaje se confirman en tu propuesta personalizada.</p>")),
+  (L("How it works", "Cómo funciona"), L("<p>One enquiry, one proposal with the final price. Flights and airport transfers are not included unless the proposal says so.</p>", "<p>Una solicitud, una propuesta con el precio final. Los vuelos y los traslados no están incluidos salvo que la propuesta lo indique.</p>"))])}
+<section class="split rule" id="enquire">
+<div class="pad dark"><p class="kicker orange-t">{L("Enquire", "Solicitud")}</p><h2 class="big">{L("Tell us about your trip", "Cuéntanos tu viaje")}</h2><p class="lead">{L("No payment now. We check availability and come back with your proposal.", "Sin pagar nada ahora. Comprobamos la disponibilidad y te enviamos tu propuesta.")}</p>{mini()}</div>
+<div class="pad bl">{form("individual", f_ind().replace('max="19"', 'max="18"').replace('<option>3</option><option>5</option><option>7</option>', '<option>5</option><option>7</option><option>10</option><option>14</option>'), L("Send my enquiry", "Enviar mi solicitud"), '<input type="hidden" name="listingId" value="bali-bukit-01"><input type="hidden" name="destination" value="Bali">')}</div>
+</section>'''
+
+
+def home_more():
+    return f'''<div class="dest">
+<a class="dcard" href="{url("bali")}">{poster("BALI", "Uluwatu · Bukit", "card")}<span class="kicker">Indonesia · Bali</span><span class="h3">{L("Surf &amp; coworking hotel · all year", "Hotel de surf y coworking · todo el año")}</span></a>
+<a class="dcard soon" href="{url("contact")}"><span class="kicker">{L("Coming soon", "Muy pronto")}</span><span class="h3">{L("More destinations", "Más destinos")}</span><span>{L("Tell us where you would like to surf →", "Dinos dónde te gustaría surfear →")}</span></a>
+</div>'''
+
+
+EXTRA_PAGES["bali"] = (bali, "Surf Trip to Bali: Surf & Coworking Hotel | SNAP", "Viaje de surf a Bali: hotel de surf y coworking | SNAP",
+    "Surf trip to Bali: boutique surf and coworking hotel in the Uluwatu area, open all year, for travellers and small groups up to 18.",
+    "Viaje de surf a Bali: hotel boutique de surf y coworking en la zona de Uluwatu, abierto todo el año, para viajeros y grupos de hasta 18.", "Bali", "Bali")
