@@ -1,4 +1,4 @@
-SNAP SURF TRIPS · web v0.5 (EN + ES) · 12/11/2026
+SNAP SURF TRIPS · web v0.7 (EN + ES) · 12/11/2026
 
 VER EN TU ORDENADOR
   Abre dist/preview/index.html con doble clic (español: dist/preview/es/index.html).
@@ -13,6 +13,7 @@ SUBIR A DINAHOSTING
   3. Comprueba que api/data/ tiene permiso de escritura y que https://TU-DOMINIO/api/data/ da error 403.
   4. Activa el SSL en el panel y quita las dos # de «Forzar HTTPS» en .htaccess.
   5. Tarea programada diaria en el panel: php api/summary.php
+     Estadísticas de visitas (sin cookies): https://TU-DOMINIO/api/stats.php?key=TU-cronKey
   6. Prueba real: envía una solicitud; debe salir el popup y llegar «[WEB-ENQ] …» a snapsurftrips@.
   7. Da de alta el dominio en Google Search Console y envía /sitemap.xml.
 

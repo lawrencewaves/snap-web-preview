@@ -239,6 +239,8 @@ def home():
 <a class="btn" href="{url("camps")}">{L("Join the SNAP network", "Únete a la red SNAP")}</a>
 </section>
 
+{home_guides()}
+{ig_block()}
 <section class="pad orange closing">
 <h2 class="mega">{L("Ready when<br>you are.", "Cuando<br>tú digas.")}</h2>
 <a class="btn btn-ink" href="{url("contact")}">{L("Send an enquiry", "Enviar solicitud")}</a>
@@ -297,7 +299,9 @@ def sagres():
 
 
 def groups():
-    def block(h, p):
+    def block(h, p, k=None):
+        if k:
+            return f'<a href="{url(k)}"><h2 class="kicker">{h}</h2><span>{p} →</span></a>'
         return f'<div><h2 class="kicker">{h}</h2><span>{p}</span></div>'
     return f'''
 <section class="split rule">
@@ -311,13 +315,13 @@ def groups():
 {pic("sagres-surf-lesson", L("Group surf lesson on the beach in the Algarve", "Clase de surf en grupo en la playa en el Algarve"), "ph tall bl", True)}
 </section>
 <section class="three rule">
-{block(L("School surf trips", "Viajes de surf para institutos y colegios"), L("End-of-year and sports trips for students aged 16 and over, always organised with the school and its teachers.", "Viajes de fin de curso y deportivos para alumnos de 16 años o más, siempre organizados con el centro y su profesorado."))}
-{block(L("University &amp; Erasmus surf trips", "Viajes de surf para universidades y Erasmus"), L("Student associations, university sports services and Erasmus groups.", "Asociaciones de estudiantes, servicios de deportes universitarios y grupos Erasmus."))}
+{block(L("School surf trips", "Viajes de surf para institutos y colegios"), L("End-of-year and sports trips for students aged 16 and over, always organised with the school and its teachers.", "Viajes de fin de curso y deportivos para alumnos de 16 años o más, siempre organizados con el centro y su profesorado."), "school")}
+{block(L("University &amp; Erasmus surf trips", "Viajes de surf para universidades y Erasmus"), L("Student associations, university sports services and Erasmus groups.", "Asociaciones de estudiantes, servicios de deportes universitarios y grupos Erasmus."), "uni")}
 {block(L("Clubs &amp; associations", "Clubs y asociaciones"), L("Sports clubs, surf clubs and youth associations.", "Clubs deportivos, clubs de surf y asociaciones juveniles."))}
 </section>
 <section class="three rule">
 {block(L("Private groups", "Grupos privados"), L("Friends, families and celebrations.", "Amigos, familias y celebraciones."))}
-{block(L("Company retreats &amp; team building", "Empresas y team building"), L("Surf, yoga and a place to work together.", "Surf, yoga y un espacio para trabajar en equipo."))}
+{block(L("Company retreats &amp; team building", "Empresas y team building"), L("Surf, yoga and a place to work together.", "Surf, yoga y un espacio para trabajar en equipo."), "team")}
 {block(L("Travel agencies", "Agencias de viajes"), L("A surf product for your group catalogue.", "Un producto de surf para vuestro catálogo de grupos."))}
 </section>
 <section class="split rule" id="enquire">
@@ -455,14 +459,14 @@ def cookies():
     return legal(L("Cookie policy", "Política de cookies"), L(f'''
 <h2>1. What cookies are</h2>
 <p>Cookies are small files that a website stores on your device. Spanish law (art. 22.2 LSSI-CE) requires your informed consent before installing any cookie that is not strictly necessary.</p>
-<h2>2. Cookies used on this website</h2>{table}
+<h2>2. Cookies used on this website</h2>{table}<p>We count visits anonymously on our own server, without cookies or any identifier: we only record the day, the page visited and the campaign source (for example, Instagram), added up.</p>
 <h2>3. How to manage cookies in your browser</h2>
 <p>You can block or delete cookies from the settings of your browser (Chrome, Safari, Firefox, Edge). Blocking them does not affect the use of this website.</p>
 <h2>4. Controller</h2>
 <p>{ORG["name"]} (SNAP SURF TRIPS) · {ORG["email"]}.</p>''', f'''
 <h2>1. Qué son las cookies</h2>
 <p>Las cookies son pequeños archivos que un sitio web guarda en tu dispositivo. La ley española (art. 22.2 LSSI-CE) exige tu consentimiento informado antes de instalar cualquier cookie que no sea estrictamente necesaria.</p>
-<h2>2. Cookies que utiliza este sitio</h2>{table}
+<h2>2. Cookies que utiliza este sitio</h2>{table}<p>Contamos las visitas de forma anónima en nuestro propio servidor, sin cookies ni ningún identificador: solo registramos el día, la página visitada y el origen de la campaña (por ejemplo, Instagram), de forma agregada.</p>
 <h2>3. Cómo gestionar las cookies en tu navegador</h2>
 <p>Puedes bloquear o eliminar las cookies desde la configuración de tu navegador (Chrome, Safari, Firefox, Edge). Bloquearlas no afecta al uso de este sitio.</p>
 <h2>4. Responsable</h2>
@@ -506,6 +510,9 @@ def terms():
 
 
 # clave: (función, título EN, título ES, descripción EN, descripción ES, etiqueta de miga EN, ES)
+exec(open(SRC / "extra.py", encoding="utf-8").read())
+PATHS.update(EXTRA_PATHS)
+
 PAGES = {
     "home": (home, "Surf Trips & Surf Camps for Travellers and Groups | SNAP", "Viajes de surf y surf camps para viajeros y grupos | SNAP",
              "Surf trips and surf camps for travellers and groups, starting in Sagres, Portugal. Packages of 3, 5 and 7 nights. One enquiry, one personalised proposal.",
@@ -527,6 +534,17 @@ PAGES = {
     "terms": (terms, "Terms and conditions | SNAP SURF TRIPS", "Condiciones generales | SNAP SURF TRIPS", "Terms and conditions of SNAP SURF TRIPS.", "Condiciones generales de SNAP SURF TRIPS.", "Terms", "Condiciones"),
 }
 
+PAGES.update(EXTRA_PAGES)
+
+
+def crumbs(key):
+    """Migas: Inicio > [padre] > página."""
+    c = [("home", L("Home", "Inicio"))]
+    if key in PARENT:
+        c.append((PARENT[key], PAGES[PARENT[key]][5 if LANG == "en" else 6]))
+    c.append((key, PAGES[key][5 if LANG == "en" else 6]))
+    return c
+
 
 def schema(key, title, desc):
     org = {"@type": "Organization", "@id": DOMAIN + "/#org", "name": "SNAP SURF TRIPS", "legalName": ORG["name"], "url": DOMAIN + "/",
@@ -537,10 +555,13 @@ def schema(key, title, desc):
          {"@type": "WebSite", "@id": DOMAIN + "/#site", "url": DOMAIN + "/", "name": "SNAP SURF TRIPS", "publisher": {"@id": DOMAIN + "/#org"}, "inLanguage": ["en", "es"]}]
     if key != "home":
         g.append({"@type": "BreadcrumbList", "itemListElement": [
-            {"@type": "ListItem", "position": 1, "name": L("Home", "Inicio"), "item": DOMAIN + "/" + path("home")},
-            {"@type": "ListItem", "position": 2, "name": PAGES[key][5 if LANG == "en" else 6], "item": DOMAIN + "/" + path(key)}]})
-    if key == "faq":
-        g.append({"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faqs()]})
+            {"@type": "ListItem", "position": i + 1, "name": n, "item": DOMAIN + "/" + path(k)} for i, (k, n) in enumerate(crumbs(key))]})
+    qa = faqs if key == "faq" else PAGE_FAQ.get(key)
+    if qa:
+        g.append({"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa()]})
+    if key in GUIDES:
+        g.append({"@type": "Article", "headline": title.split(" | ")[0], "description": desc, "inLanguage": LANG, "datePublished": TODAY, "dateModified": TODAY,
+                  "author": {"@id": DOMAIN + "/#org"}, "publisher": {"@id": DOMAIN + "/#org"}, "image": DOMAIN + "/img/og.jpg", "mainEntityOfPage": DOMAIN + "/" + path(key)})
     if key == "sagres":
         g.append({"@type": "TouristTrip", "name": L("Surf trip to Sagres, Algarve", "Viaje de surf a Sagres, Algarve"), "description": desc,
                   "touristType": ["Surfers", "Beginners", "Groups"], "provider": {"@id": DOMAIN + "/#org"},
@@ -552,11 +573,12 @@ def schema(key, title, desc):
 def page(key):
     fn, t_en, t_es, d_en, d_es, _, _ = PAGES[key]
     title, desc = L(t_en, t_es), L(d_en, d_es)
+    body = fn()
     other = "es" if LANG == "en" else "en"
     canon = DOMAIN + "/" + path(key)
     NOINDEX = '<meta name="robots" content="noindex,nofollow">\n' if PREVIEW else ""
     logo = f'<img src="{rel("img/snap-logo.png")}" alt="SNAP SURF TRIPS" width="900" height="214">'
-    nav = (f'<a href="{url("sagres")}">{L("Surf trips", "Viajes de surf")}</a><a href="{url("groups")}">{L("Groups", "Grupos")}</a>'
+    nav = (f'<a href="{url("trips")}">{L("Surf trips", "Viajes de surf")}</a><a href="{url("groups")}">{L("Groups", "Grupos")}</a>'
            f'<a href="{url("camps")}">{L("For surf camps", "Para surf camps")}</a><a href="{url("faq")}">FAQ</a><a href="{url("contact")}">{L("Contact", "Contacto")}</a>')
     langs = "".join(
         f'<a href="{rel(path(key, lg))}" hreflang="{lg}" lang="{lg}" title="{name}"' + (' aria-current="true"' if lg == LANG else "") + f'>{FLAG[lg]}<span>{lg.upper()}</span></a>'
@@ -566,7 +588,8 @@ def page(key):
     ig_html = (f'<a href="{ig}" rel="noopener" aria-label="Instagram">{ICON["instagram"]}</a>' if ig else
                f'<span class="soon" role="img" aria-label="Instagram ({L("coming soon", "próximamente")})" title="Instagram · {L("coming soon", "próximamente")}">{ICON["instagram"]}</span>')
     social = f'<div class="social">{ig_html}<a href="{WA}" rel="noopener" aria-label="WhatsApp">{ICON["whatsapp"]}</a></div>'
-    crumb = "" if key == "home" else f'<nav class="crumb" aria-label="Breadcrumb"><a href="{url("home")}">{L("Home", "Inicio")}</a> / <span aria-current="page">{PAGES[key][5 if LANG == "en" else 6]}</span></nav>'
+    cr = crumbs(key)
+    crumb = "" if key == "home" else '<nav class="crumb" aria-label="Breadcrumb">' + " / ".join(f'<a href="{url(k)}">{n}</a>' for k, n in cr[:-1]) + f' / <span aria-current="page">{cr[-1][1]}</span></nav>'
     banner = "" if not GA_ID else f'''<div id="ck" class="ck" role="dialog" aria-label="Cookies" hidden>
 <p>{L("We use analytics cookies to understand how the site is used. They are only installed if you accept.", "Usamos cookies analíticas para saber cómo se utiliza el sitio. Solo se instalan si las aceptas.")} <a href="{url("cookies")}">{L("Cookie policy", "Política de cookies")}</a></p>
 <div class="row"><button class="btn sm" type="button" data-ck="0">{L("Reject", "Rechazar")}</button><button class="btn sm" type="button" data-ck="1">{L("Accept", "Aceptar")}</button></div></div>'''
@@ -606,10 +629,10 @@ def page(key):
 <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mainnav"><span></span>{L("Menu", "Menú")}</button>
 <a class="btn btn-ink sm" href="{url("sagres", "#enquire")}">{L("Plan my trip", "Planear mi viaje")}</a>
 </header>
-<main id="main">{crumb}{fn()}</main>
+<main id="main">{crumb}{body}</main>
 <footer class="foot">
 <div><a class="logo" href="{url("home")}">{logo}</a><p class="small">{L("Surf trips around the world for travellers and groups.", "Viajes de surf por el mundo para viajeros y grupos.")}<br>{ORG["email"]} · {ORG["tel"]}</p>{social}</div>
-<nav aria-label="{L("Site", "Sitio")}"><a href="{url("sagres")}">{L("Surf trip to Sagres", "Viaje de surf a Sagres")}</a><a href="{url("groups")}">{L("Group surf trips", "Viajes de surf para grupos")}</a><a href="{url("camps")}">{L("For surf camps", "Para surf camps")}</a><a href="{url("faq")}">FAQ</a><a href="{url("contact")}">{L("Contact", "Contacto")}</a></nav>
+<nav aria-label="{L("Site", "Sitio")}"><a href="{url("trips")}">{L("Surf destinations", "Destinos de surf")}</a><a href="{url("sagres")}">{L("Surf trip to Sagres", "Viaje de surf a Sagres")}</a><a href="{url("groups")}">{L("Group surf trips", "Viajes de surf para grupos")}</a><a href="{url("camps")}">{L("For surf camps", "Para surf camps")}</a><a href="{url("guides")}">{L("Surf guides", "Guías de surf")}</a><a href="{url("faq")}">FAQ</a><a href="{url("contact")}">{L("Contact", "Contacto")}</a></nav>
 <nav aria-label="Legal"><a href="{url("notice")}">{L("Legal notice", "Aviso legal")}</a><a href="{url("privacy")}">{L("Privacy policy", "Privacidad")}</a><a href="{url("cookies")}">{L("Cookie policy", "Cookies")}</a><a href="{url("terms")}">{L("Terms", "Condiciones")}</a>{cks}</nav>
 <p class="small legal-line">© {TODAY[:4]} SNAP SURF TRIPS · {L("A brand of", "Marca de")} {ORG["name"]} · NIF {ORG["nif"]}</p>
 </footer>
@@ -652,6 +675,11 @@ def llms():
 ## Pages
 - [Surf trip to Sagres]({DOMAIN}/{PATHS["sagres"][0]}): accommodation, packages and enquiry form
 - [Group surf trips]({DOMAIN}/{PATHS["groups"][0]}): schools, universities, clubs, companies
+- [Surf destinations]({DOMAIN}/{PATHS["trips"][0]})
+- [End-of-year school surf trips (16+)]({DOMAIN}/{PATHS["school"][0]})
+- [University & Erasmus surf trips]({DOMAIN}/{PATHS["uni"][0]})
+- [Surf team building & company retreats]({DOMAIN}/{PATHS["team"][0]})
+- [Guides]({DOMAIN}/{PATHS["guides"][0]}): how to organise a group surf trip, packing list, first surf trip
 - [FAQ]({DOMAIN}/{PATHS["faq"][0]}): prices, inclusions, season, booking process
 - [For surf camps]({DOMAIN}/{PATHS["camps"][0]}): partner network
 - [Contact]({DOMAIN}/{PATHS["contact"][0]})
