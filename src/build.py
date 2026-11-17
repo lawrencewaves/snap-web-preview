@@ -284,7 +284,7 @@ def sagres():
 {pic("sagres-house-room", L("Private room in the surf house", "Habitación privada de la surf house"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-house-dorm", L("Shared room with bunk beds", "Habitación compartida con literas"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-house-dinner", L("Guests sharing dinner at the surf house", "Huéspedes cenando juntos en la surf house"), sizes="(max-width:860px) 50vw, 33vw")}
-{pic("sagres-surf-mountain", L("Surfer riding a wave with the hills of Sagres behind", "Surfista cogiendo una ola con las colinas de Sagres detrás"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("sagres-yoga-beach", L("Woman meditating on a mat by the water", "Mujer meditando sobre una esterilla junto al agua"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-surf-lesson", L("Surf lesson on the beach near Sagres", "Clase de surf en la playa cerca de Sagres"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-coast", L("Beach and cliffs near Sagres", "Playa y acantilados cerca de Sagres"), sizes="(max-width:860px) 50vw, 33vw")}
 </section>

@@ -93,7 +93,7 @@ def team():
         L("Surf <mark>team building</mark> &amp; company retreats", "<mark>Team building</mark> de surf y retiros de empresa"),
         L("Surf as a shared challenge, yoga to reset and a space to work together. A company retreat in Sagres, quoted for your team.",
           "El surf como reto compartido, yoga para desconectar y un espacio para trabajar juntos. Un retiro de empresa en Sagres, presupuestado para vuestro equipo."),
-        "sagres-surf-group", L("Group practising surf moves on the beach in Sagres", "Grupo practicando movimientos de surf en la playa de Sagres"),
+        "sagres-yoga-beach", L("Woman meditating on a mat by the water", "Mujer meditando sobre una esterilla junto al agua"),
         [(L("Work and surf", "Trabajo y surf"),
           L("<p>The surf house has a coworking space with a projector for sessions and meetings between surf lessons.</p>",
             "<p>La surf house tiene un espacio coworking con proyector para sesiones y reuniones entre clases de surf.</p>")),
