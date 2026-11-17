@@ -198,7 +198,7 @@ def home():
                     "Surf camps y surf houses seleccionados para viajeros y grupos. Dinos cuándo, quiénes y vuestro nivel: comprobamos la disponibilidad y te enviamos una propuesta personalizada.")}</p>
 <div class="row"><a class="btn btn-accent" href="{url("sagres")}">{L("Find my surf trip", "Buscar mi viaje de surf")}</a><a class="btn" href="{url("groups")}">{L("I'm organising a group", "Organizo un grupo")}</a></div>
 </div>
-{pic("sagres-surf-carve", L("Surfer carving a turquoise wave below a sea cliff", "Surfista surcando una ola turquesa bajo un acantilado"), "ph hero-ph", True)}
+{pic("sagres-surf-blue", L("Surfer riding a wave in front of a misty sea cliff", "Surfista cogiendo una ola frente a un acantilado entre la bruma"), "ph hero-ph", True)}
 </section>
 
 <section class="ticker" aria-hidden="true"><div>{L("<span>Surf trips</span><span>Surf camps</span><span>Surf houses</span><span>Group trips</span><span>Sagres</span><span>Bali</span><span>Coming soon: more destinations</span>","<span>Viajes de surf</span><span>Surf camps</span><span>Surf houses</span><span>Grupos</span><span>Sagres</span><span>Bali</span><span>Pronto: más destinos</span>")}{L("<span>Surf trips</span><span>Surf camps</span><span>Surf houses</span><span>Group trips</span><span>Sagres</span><span>Bali</span><span>Coming soon: more destinations</span>","<span>Viajes de surf</span><span>Surf camps</span><span>Surf houses</span><span>Grupos</span><span>Sagres</span><span>Bali</span><span>Pronto: más destinos</span>")}</div></section>
@@ -284,7 +284,7 @@ def sagres():
 {pic("sagres-house-room", L("Private room in the surf house", "Habitación privada de la surf house"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-house-dorm", L("Shared room with bunk beds", "Habitación compartida con literas"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-house-dinner", L("Guests sharing dinner at the surf house", "Huéspedes cenando juntos en la surf house"), sizes="(max-width:860px) 50vw, 33vw")}
-{pic("sagres-house-yoga", L("Yoga session at the surf house", "Sesión de yoga en la surf house"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("sagres-surf-mountain", L("Surfer riding a wave with the hills of Sagres behind", "Surfista cogiendo una ola con las colinas de Sagres detrás"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-surf-lesson", L("Surf lesson on the beach near Sagres", "Clase de surf en la playa cerca de Sagres"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-coast", L("Beach and cliffs near Sagres", "Playa y acantilados cerca de Sagres"), sizes="(max-width:860px) 50vw, 33vw")}
 </section>

@@ -93,7 +93,7 @@ def team():
         L("Surf <mark>team building</mark> &amp; company retreats", "<mark>Team building</mark> de surf y retiros de empresa"),
         L("Surf as a shared challenge, yoga to reset and a space to work together. A company retreat in Sagres, quoted for your team.",
           "El surf como reto compartido, yoga para desconectar y un espacio para trabajar juntos. Un retiro de empresa en Sagres, presupuestado para vuestro equipo."),
-        "sagres-house-yoga", L("Yoga session at the surf house", "Sesión de yoga en la surf house"),
+        "sagres-surf-group", L("Group practising surf moves on the beach in Sagres", "Grupo practicando movimientos de surf en la playa de Sagres"),
         [(L("Work and surf", "Trabajo y surf"),
           L("<p>The surf house has a coworking space with a projector for sessions and meetings between surf lessons.</p>",
             "<p>La surf house tiene un espacio coworking con proyector para sesiones y reuniones entre clases de surf.</p>")),
@@ -150,7 +150,7 @@ def g_pack():
          (L("For the rest of the day", "Para el resto del día"), L("<ul><li>A warm layer or hoodie for the evenings by the sea</li><li>Comfortable clothes and trainers</li><li>Reusable water bottle</li><li>Cap and sunglasses</li></ul>", "<ul><li>Una capa de abrigo o sudadera para las tardes junto al mar</li><li>Ropa cómoda y zapatillas</li><li>Botella de agua reutilizable</li><li>Gorra y gafas de sol</li></ul>")),
          (L("Documents", "Documentación"), L("<ul><li>ID card or passport</li><li>European Health Insurance Card if you live in the EU</li><li>Travel insurance details, if you have it</li></ul>", "<ul><li>DNI o pasaporte</li><li>Tarjeta Sanitaria Europea si vives en la UE</li><li>Datos de tu seguro de viaje, si lo tienes</li></ul>")),
          (L("Leave at home", "Déjalo en casa"), L("<p>Valuables you will not use. You will spend most of the day on the beach.</p>", "<p>Objetos de valor que no vayas a usar. Pasarás casi todo el día en la playa.</p>"))],
-        "sagres-surf-carve", L("Surfer riding a wave", "Surfista cogiendo una ola"))
+        "sagres-surf-blue", L("Surfer riding a wave", "Surfista cogiendo una ola"))
 
 
 def g_first():
@@ -165,7 +165,7 @@ def g_first():
 
 def guides():
     items = "".join(f'<a class="dcard" href="{url(k)}">{pic(ph, "", sizes="(max-width:860px) 100vw, 33vw")}<span class="kicker">{L("Guide", "Guía")}</span><span class="h3">{PAGES[k][1 if LANG == "en" else 2].split(" | ")[0]}</span></a>'
-                    for k, ph in (("g_group", "sagres-surf-group"), ("g_pack", "sagres-surf-carve"), ("g_first", "sagres-surf-lesson")))
+                    for k, ph in (("g_group", "sagres-surf-group"), ("g_pack", "sagres-surf-blue"), ("g_first", "sagres-surf-lesson")))
     return f'''
 <section class="pad"><h1 class="kicker">{L("Surf trip guides", "Guías de viajes de surf")}</h1><p class="mega">{L("Surf<br><mark>guides</mark>", "Guías<br>de <mark>surf</mark>")}</p>
 <p class="lead">{L("Practical guides to plan a surf trip, alone, with friends or with a group.", "Guías prácticas para planear un viaje de surf, por tu cuenta, con amigos o en grupo.")}</p></section>
@@ -181,7 +181,7 @@ def ig_block():
     ig = SOCIAL["instagram"]
     if not ig:
         return ""
-    tiles = "".join(f'<a href="{ig}" target="_blank" rel="noopener" class="igt">{pic(p, "", sizes="(max-width:860px) 33vw, 16vw")}</a>' for p in ("sagres-surf-mountain", "bali-pool-day", "sagres-coast-aerial", "bali-terrace", "sagres-surf-blue", "bali-pool-night"))
+    tiles = "".join(f'<a href="{ig}" target="_blank" rel="noopener" class="igt">{pic(p, "", sizes="(max-width:860px) 33vw, 16vw")}</a>' for p in ("sagres-surf-mountain", "bali-pool-day", "sagres-coast-aerial", "bali-terrace", "sagres-sunset", "bali-pool-night"))
     return f'<section class="pad"><div class="head"><h2 class="big">{L("Follow the swell", "Síguenos")}</h2><a class="btn" href="{ig}" target="_blank" rel="noopener">{IG_HANDLE} · Instagram</a></div><div class="igrid">{tiles}</div></section>'
 
 
