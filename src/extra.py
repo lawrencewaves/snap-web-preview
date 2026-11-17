@@ -205,7 +205,7 @@ EXTRA_PAGES = {
 }
 
 
-# ---------- Bali (camps/partner-bali · listing bali-bukit-01) ----------
+# ---------- Bali (listing bali-bukit-01) ----------
 # Sin nombre, sin Instagram y sin fotos del partner hasta tener permiso escrito (R-006 + ficha del CRM). Cartel gráfico propio.
 EXTRA_PATHS["bali"] = ("surf-trips/bali/", "es/viajes-surf/bali/")
 PARENT["bali"] = "trips"

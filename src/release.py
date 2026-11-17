@@ -1,5 +1,5 @@
 """SNAP · paquete para subir al servidor. Uso: python3 src/release.py https://www.dominio.com
-Genera la web con el dominio, comprueba que no queda ningún «TU-DOMINIO» ni nombre de partner y crea snap-web-<dominio>-<fecha>.zip
+Genera la web con el dominio, comprueba que no queda ningún «TU-DOMINIO» ni nombre de partner (lista en blocklist.txt, fuera del repo: un nombre por línea) y crea snap-web-<dominio>-<fecha>.zip
 con el contenido de dist/public (sin config.php ni datos). Ese zip se descomprime tal cual en la carpeta www del hosting."""
 import sys, subprocess, pathlib, zipfile, datetime, re
 if len(sys.argv) < 2 or "TU-DOMINIO" in sys.argv[1]:
@@ -7,7 +7,20 @@ if len(sys.argv) < 2 or "TU-DOMINIO" in sys.argv[1]:
 root = pathlib.Path(__file__).resolve().parent.parent
 subprocess.run([sys.executable, "-I", str(root / "src/build.py"), sys.argv[1]], check=True)
 pub = root / "dist/public"
-bad = [str(f) for f in pub.rglob("*") if f.suffix in (".html", ".xml", ".txt", ".js") and re.search(r"TU-DOMINIO|partner|sun ?stay|partner|partner", f.read_text(errors="ignore"), re.I)]
+bl = root / "blocklist.txt"  # nombres de partners: fuera del repo público (R-006); sin él no se publica
+if not bl.exists():
+    sys.exit("Falta blocklist.txt junto a src/ (un nombre de partner por línea; no se sube al repo)")
+names = [re.escape(n.strip()) for n in bl.read_text().splitlines() if n.strip()]
+if not names:
+    sys.exit("blocklist.txt está vacío")
+pat = re.compile("|".join(names), re.I)
+dom = re.compile("TU-DOMINIO")  # el config.sample.php lo lleva a propósito: se rellena en el servidor
+bad = []
+for f in pub.rglob("*"):
+    if f.is_file() and f.suffix in (".html", ".xml", ".txt", ".js", ".php", ".htaccess", ".json"):
+        txt = f.read_text(errors="ignore")
+        if pat.search(txt) or (f.suffix != ".php" and dom.search(txt)):
+            bad.append(str(f))
 if bad:
     sys.exit("Revisar antes de publicar: " + ", ".join(bad[:5]))
 host = sys.argv[1].split("//")[-1].strip("/")
