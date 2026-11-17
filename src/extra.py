@@ -112,7 +112,7 @@ def trips():
 <p class="lead">{L("Each destination is a surf camp or surf house we work with. Pick one and send one enquiry: you get one personalised proposal.", "Cada destino es un surf camp o surf house con el que trabajamos. Elige uno y envía una solicitud: recibes una propuesta personalizada.")}</p><a class="btn btn-orange" href="{url("match")}">{L("Not sure? Find your match", "¿Dudas? Encuentra tu destino")}</a></section>
 <section class="pad dest">
 <a class="dcard" href="{url("sagres")}">{pic("sagres-coast", L("Beach and cliffs near Sagres", "Playa y acantilados cerca de Sagres"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Portugal · Algarve</span><span class="h2">Sagres</span><span>{L("Surf house with pool · 3, 5 and 7 nights →", "Surf house con piscina · 3, 5 y 7 noches →")}</span></a>
-<a class="dcard" href="{url("bali")}">{poster("BALI", "Uluwatu · Bukit", "card")}<span class="kicker">Indonesia · Bali</span><span class="h2">Bali</span><span>{L("Surf &amp; coworking hotel · all year · up to 18 →", "Hotel de surf y coworking · todo el año · hasta 18 →")}</span></a>
+<a class="dcard" href="{url("bali")}">{pic("bali-pool-day", L("Swimming pool and thatched lounge in the garden of the surf and coworking hotel in Bali", "Piscina y zona lounge con techo de palma en el jardín del hotel de surf y coworking en Bali"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Indonesia · Bali</span><span class="h2">Bali</span><span>{L("Surf &amp; coworking hotel · all year · up to 18 →", "Hotel de surf y coworking · todo el año · hasta 18 →")}</span></a>
 <a class="dcard soon" href="{url("contact")}"><span class="kicker">{L("Coming soon", "Muy pronto")}</span><span class="h2">{L("New destinations", "Nuevos destinos")}</span><span>{L("We are adding new surf camps. Ask us where you would like to go →", "Estamos sumando nuevos surf camps. Dinos adónde te gustaría ir →")}</span></a>
 </section>'''
 
@@ -225,7 +225,7 @@ def bali():
 <p class="lead">{L("A small boutique surf &amp; coworking hotel on the Bukit peninsula, in the Uluwatu area: surf in the morning, work or rest in the afternoon. Open all year, for travellers and small groups up to 18.",
                     "Un pequeño hotel boutique de surf y coworking en la península de Bukit, en la zona de Uluwatu: surf por la mañana, trabajo o descanso por la tarde. Abierto todo el año, para viajeros y grupos pequeños de hasta 18 personas.")}</p>
 </section>
-{poster("BALI", L("Uluwatu · Bukit", "Uluwatu · Bukit"), "wide")}
+{pic("bali-pool-day", L("Swimming pool and thatched lounge in the garden of the surf and coworking hotel in Bali", "Piscina y zona lounge con techo de palma en el jardín del hotel de surf y coworking en Bali"), "ph pano rule", True, "100vw")}
 <section class="split rule">
 <div class="pad">
 <p class="kicker">{L("The stay", "El alojamiento")}</p>
@@ -235,7 +235,15 @@ def bali():
 <ul class="facts">{"".join(f"<li>{x}</li>" for x in facts)}</ul>
 <a class="btn btn-orange" href="#enquire">{L("Get my proposal", "Pedir mi propuesta")}</a>
 </div>
-{poster(L("SURF", "SURF"), L("Balangan · Padang Padang · Bingin", "Balangan · Padang Padang · Bingin"), "tall alt")}
+{pic("bali-cowork-lounge", L("Shared work and lounge area with wooden tables and woven lamps", "Zona común de trabajo y descanso con mesas de madera y lámparas de fibra"), "ph tall bl")}
+</section>
+<section class="gallery rule" aria-label="{L("Photos", "Fotos")}">
+{pic("bali-terrace", L("Room terrace with sofa and sliding doors to the bedroom", "Terraza de la habitación con sofá y puertas correderas al dormitorio"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("bali-bedroom-garden", L("Bedroom opening onto the garden", "Dormitorio abierto al jardín"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("bali-kitchen-cowork", L("Kitchen and work table with fresh fruit", "Cocina y mesa de trabajo con fruta fresca"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("bali-pool-night", L("Swimming pool lit up at night", "Piscina iluminada por la noche"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("bali-mirror-bedroom", L("Bedroom with a large wooden mirror and woven lamp", "Dormitorio con gran espejo de madera y lámpara de fibra"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("bali-coffee", L("Fresh ground coffee", "Café recién molido"), sizes="(max-width:860px) 50vw, 33vw")}
 </section>
 {cards([
   (L("Who it is for", "Para quién"), L("<p>Surfers who want to combine waves and remote work, friends and small groups of up to 18 people. Adults only.</p>", "<p>Surfistas que quieren combinar olas y trabajo en remoto, amigos y grupos pequeños de hasta 18 personas. Solo adultos.</p>")),
@@ -250,7 +258,7 @@ def bali():
 
 def home_more():
     return f'''<div class="dest">
-<a class="dcard" href="{url("bali")}">{poster("BALI", "Uluwatu · Bukit", "card")}<span class="kicker">Indonesia · Bali</span><span class="h3">{L("Surf &amp; coworking hotel · all year", "Hotel de surf y coworking · todo el año")}</span></a>
+<a class="dcard" href="{url("bali")}">{pic("bali-pool-day", L("Swimming pool and thatched lounge in the garden of the surf and coworking hotel in Bali", "Piscina y zona lounge con techo de palma en el jardín del hotel de surf y coworking en Bali"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Indonesia · Bali</span><span class="h3">{L("Surf &amp; coworking hotel · all year", "Hotel de surf y coworking · todo el año")}</span></a>
 <a class="dcard soon" href="{url("contact")}"><span class="kicker">{L("Coming soon", "Muy pronto")}</span><span class="h3">{L("More destinations", "Más destinos")}</span><span>{L("Tell us where you would like to surf →", "Dinos dónde te gustaría surfear →")}</span></a>
 </div>'''
 

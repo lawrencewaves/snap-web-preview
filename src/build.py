@@ -721,7 +721,6 @@ def build(out, preview):
             r = subprocess.run([str(nm / tool), str(out / f), "-o", str(out / f), *args], capture_output=True, text=True)
             if r.returncode:
                 print("aviso", tool, r.stderr[:200])
-    og_poster(out / "img/og-bali.jpg", "BALI", "SNAP SURF TRIPS · SURF & COWORKING")
     for lang in ("en", "es"):
         LANG = lang
         for key in PAGES:
