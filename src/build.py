@@ -683,7 +683,7 @@ def llms():
 > SNAP SURF TRIPS is a commercial agent for surf camps and surf houses around the world (first destination: Sagres, Portugal; more coming). It presents their surf trips to individual travellers and for groups (schools 16+, universities, Erasmus, clubs, private groups, companies). Customers send one enquiry and receive one personalised proposal. An enquiry is not a booking.
 
 ## Key facts
-- Destination: Bali (Indonesia), Bukit peninsula / Uluwatu area. Boutique surf & coworking hotel with pool, breakfast, spa. Open all year; travellers and small groups up to 18; adults only.
+- Destination: Bali (Indonesia), Bukit peninsula / Uluwatu area. Boutique surf & coworking hotel with pool, breakfast, spa. Open all year; travellers and small groups up to 20; adults only.
 - Destination available: Sagres, Algarve, Portugal. Surf house with pool, private and shared rooms, breakfast included, own surf school. Open March to December.
 - Surf packages: 3 nights + 1 surf day; 5 nights + 2 surf days; 7 nights + 5 surf days (2 sessions of 1 h 30 a day, equipment, picnic and insurance). Tailor-made options.
 - Prices: no public price list. Every trip is quoted personally in a proposal, with no commitment.

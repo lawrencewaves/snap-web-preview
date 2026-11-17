@@ -112,7 +112,7 @@ def trips():
 <p class="lead">{L("Each destination is a surf camp or surf house we work with. Pick one and send one enquiry: you get one personalised proposal.", "Cada destino es un surf camp o surf house con el que trabajamos. Elige uno y envía una solicitud: recibes una propuesta personalizada.")}</p><a class="btn btn-accent" href="{url("match")}">{L("Not sure? Find your match", "¿Dudas? Encuentra tu destino")}</a></section>
 <section class="pad dest">
 <a class="dcard" href="{url("sagres")}">{pic("sagres-coast", L("Beach and cliffs near Sagres", "Playa y acantilados cerca de Sagres"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Portugal · Algarve</span><span class="h2">Sagres</span><span>{L("Surf house with pool · 3, 5 and 7 nights →", "Surf house con piscina · 3, 5 y 7 noches →")}</span></a>
-<a class="dcard" href="{url("bali")}">{pic("bali-pool-day", L("Swimming pool and thatched lounge in the garden of the surf and coworking hotel in Bali", "Piscina y zona lounge con techo de palma en el jardín del hotel de surf y coworking en Bali"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Indonesia · Bali</span><span class="h2">Bali</span><span>{L("Surf &amp; coworking hotel · all year · up to 18 →", "Hotel de surf y coworking · todo el año · hasta 18 →")}</span></a>
+<a class="dcard" href="{url("bali")}">{pic("bali-pool-day", L("Swimming pool and thatched lounge in the garden of the surf and coworking hotel in Bali", "Piscina y zona lounge con techo de palma en el jardín del hotel de surf y coworking en Bali"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Indonesia · Bali</span><span class="h2">Bali</span><span>{L("Surf &amp; coworking hotel · all year · up to 20 →", "Hotel de surf y coworking · todo el año · hasta 20 →")}</span></a>
 <a class="dcard soon" href="{url("contact")}"><span class="kicker">{L("Coming soon", "Muy pronto")}</span><span class="h2">{L("New destinations", "Nuevos destinos")}</span><span>{L("We are adding new surf camps. Ask us where you would like to go →", "Estamos sumando nuevos surf camps. Dinos adónde te gustaría ir →")}</span></a>
 </section>'''
 
@@ -222,8 +222,8 @@ def bali():
 <section class="pad rule">
 <p class="kicker">Indonesia · Bali · {L("Bukit peninsula", "Península de Bukit")}</p>
 <h1 class="mega">{L("Surf trip<br>to <mark>Bali</mark>", "Viaje de surf<br>a <mark>Bali</mark>")}</h1>
-<p class="lead">{L("A small boutique surf &amp; coworking hotel on the Bukit peninsula, in the Uluwatu area: surf in the morning, work or rest in the afternoon. Open all year, for travellers and small groups up to 18.",
-                    "Un pequeño hotel boutique de surf y coworking en la península de Bukit, en la zona de Uluwatu: surf por la mañana, trabajo o descanso por la tarde. Abierto todo el año, para viajeros y grupos pequeños de hasta 18 personas.")}</p>
+<p class="lead">{L("A small boutique surf &amp; coworking hotel on the Bukit peninsula, in the Uluwatu area: surf in the morning, work or rest in the afternoon. Open all year, for travellers and small groups up to 20.",
+                    "Un pequeño hotel boutique de surf y coworking en la península de Bukit, en la zona de Uluwatu: surf por la mañana, trabajo o descanso por la tarde. Abierto todo el año, para viajeros y grupos pequeños de hasta 20 personas.")}</p>
 </section>
 {pic("bali-pool-day", L("Swimming pool and thatched lounge in the garden of the surf and coworking hotel in Bali", "Piscina y zona lounge con techo de palma en el jardín del hotel de surf y coworking en Bali"), "ph pano rule", True, "100vw")}
 <section class="split rule">
@@ -246,13 +246,13 @@ def bali():
 {pic("bali-coffee", L("Fresh ground coffee", "Café recién molido"), sizes="(max-width:860px) 50vw, 33vw")}
 </section>
 {cards([
-  (L("Who it is for", "Para quién"), L("<p>Surfers who want to combine waves and remote work, friends and small groups of up to 18 people. Adults only.</p>", "<p>Surfistas que quieren combinar olas y trabajo en remoto, amigos y grupos pequeños de hasta 18 personas. Solo adultos.</p>")),
+  (L("Who it is for", "Para quién"), L("<p>Surfers who want to combine waves and remote work, friends and small groups of up to 20 people. Adults only.</p>", "<p>Surfistas que quieren combinar olas y trabajo en remoto, amigos y grupos pequeños de hasta 20 personas. Solo adultos.</p>")),
   (L("When to go", "Cuándo ir"), L("<p>Open all year. Tell us your dates and we check availability.</p>", "<p>Abierto todo el año. Dinos tus fechas y comprobamos la disponibilidad.</p>")),
   (L("Surfing", "El surf"), L("<p>Tell us your level. Surf options for your trip are confirmed in your personalised proposal.</p>", "<p>Cuéntanos tu nivel. Las opciones de surf de tu viaje se confirman en tu propuesta personalizada.</p>")),
   (L("How it works", "Cómo funciona"), L("<p>One enquiry, one proposal with the final price. Flights and airport transfers are not included unless the proposal says so.</p>", "<p>Una solicitud, una propuesta con el precio final. Los vuelos y los traslados no están incluidos salvo que la propuesta lo indique.</p>"))])}
 <section class="split rule" id="enquire">
 <div class="pad dark"><p class="kicker accent-t">{L("Enquire", "Solicitud")}</p><h2 class="big">{L("Tell us about your trip", "Cuéntanos tu viaje")}</h2><p class="lead">{L("No payment now. We check availability and come back with your proposal.", "Sin pagar nada ahora. Comprobamos la disponibilidad y te enviamos tu propuesta.")}</p>{mini()}</div>
-<div class="pad bl">{form("individual", f_ind().replace('max="19"', 'max="18"').replace('<option>3</option><option>5</option><option>7</option>', '<option>5</option><option>7</option><option>10</option><option>14</option>'), L("Send my enquiry", "Enviar mi solicitud"), '<input type="hidden" name="listingId" value="bali-bukit-01"><input type="hidden" name="destination" value="Bali">')}</div>
+<div class="pad bl">{form("individual", f_ind().replace('max="19"', 'max="20"').replace('<option>3</option><option>5</option><option>7</option>', '<option>5</option><option>7</option><option>10</option><option>14</option>'), L("Send my enquiry", "Enviar mi solicitud"), '<input type="hidden" name="listingId" value="bali-bukit-01"><input type="hidden" name="destination" value="Bali">')}</div>
 </section>'''
 
 
@@ -264,8 +264,8 @@ def home_more():
 
 
 EXTRA_PAGES["bali"] = (bali, "Surf Trip to Bali: Surf & Coworking Hotel | SNAP", "Viaje de surf a Bali: hotel de surf y coworking | SNAP",
-    "Surf trip to Bali: boutique surf and coworking hotel in the Uluwatu area, open all year, for travellers and small groups up to 18.",
-    "Viaje de surf a Bali: hotel boutique de surf y coworking en la zona de Uluwatu, abierto todo el año, para viajeros y grupos de hasta 18.", "Bali", "Bali")
+    "Surf trip to Bali: boutique surf and coworking hotel in the Uluwatu area, open all year, for travellers and small groups up to 20.",
+    "Viaje de surf a Bali: hotel boutique de surf y coworking en la zona de Uluwatu, abierto todo el año, para viajeros y grupos de hasta 20.", "Bali", "Bali")
 
 
 # ---------- compartir (sin scripts de terceros) y cartel OG ----------
@@ -288,7 +288,7 @@ MATCH_DATA = {
     "sagres": {"listing": "sagres-surf-house-01", "max": 100, "minors": True, "months": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
                "groupClosed": [1, 2, 8], "lessons": True,
                "vibe": {"learn": 25, "progress": 15, "work": 10, "social": 20, "nature": 20}},
-    "bali": {"listing": "bali-bukit-01", "max": 18, "minors": False, "months": list(range(1, 13)), "groupClosed": [], "lessons": False,
+    "bali": {"listing": "bali-bukit-01", "max": 20, "minors": False, "months": list(range(1, 13)), "groupClosed": [], "lessons": False,
              "vibe": {"learn": 5, "progress": 15, "work": 30, "social": 15, "nature": 15}},
 }
 
