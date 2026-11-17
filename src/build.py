@@ -196,16 +196,16 @@ def home():
 <p class="mega">{L("You surf.<br>We handle<br><mark>the rest.</mark>", "Tú surfeas.<br>Nosotros,<br><mark>el resto.</mark>")}</p>
 <p class="lead">{L("Curated surf camps and surf houses for travellers and groups. Tell us when, who and your surf level: we check availability and send you one personalised proposal.",
                     "Surf camps y surf houses seleccionados para viajeros y grupos. Dinos cuándo, quiénes y vuestro nivel: comprobamos la disponibilidad y te enviamos una propuesta personalizada.")}</p>
-<div class="row"><a class="btn btn-orange" href="{url("sagres")}">{L("Find my surf trip", "Buscar mi viaje de surf")}</a><a class="btn" href="{url("groups")}">{L("I'm organising a group", "Organizo un grupo")}</a></div>
+<div class="row"><a class="btn btn-accent" href="{url("sagres")}">{L("Find my surf trip", "Buscar mi viaje de surf")}</a><a class="btn" href="{url("groups")}">{L("I'm organising a group", "Organizo un grupo")}</a></div>
 </div>
-{pic("sagres-surf-wave", L("Surfer riding a wave in the Algarve", "Surfista cogiendo una ola en el Algarve"), "ph hero-ph", True)}
+{pic("sagres-surf-carve", L("Surfer carving a turquoise wave below a sea cliff", "Surfista surcando una ola turquesa bajo un acantilado"), "ph hero-ph", True)}
 </section>
 
 <section class="ticker" aria-hidden="true"><div>{L("<span>Surf trips</span><span>Surf camps</span><span>Surf houses</span><span>Group trips</span><span>Sagres</span><span>Bali</span><span>Coming soon: more destinations</span>","<span>Viajes de surf</span><span>Surf camps</span><span>Surf houses</span><span>Grupos</span><span>Sagres</span><span>Bali</span><span>Pronto: más destinos</span>")}{L("<span>Surf trips</span><span>Surf camps</span><span>Surf houses</span><span>Group trips</span><span>Sagres</span><span>Bali</span><span>Coming soon: more destinations</span>","<span>Viajes de surf</span><span>Surf camps</span><span>Surf houses</span><span>Grupos</span><span>Sagres</span><span>Bali</span><span>Pronto: más destinos</span>")}</div></section>
 
 <section class="three rule">
 <a href="{url("sagres")}"><span class="kicker">A /</span><span class="h3">{L("I want to surf", "Quiero surfear")}</span><span>{L("Solo, as a couple or with friends. Surf packages of 3, 5 and 7 nights. →", "Por tu cuenta, en pareja o con amigos. Packs de surf de 3, 5 y 7 noches. →")}</span></a>
-<a class="orange" href="{url("groups")}"><span class="kicker">B /</span><span class="h3">{L("I'm organising a group", "Organizo un grupo")}</span><span>{L("Schools, universities, clubs, companies. A closed proposal built for your group. →", "Institutos, universidades, clubs, empresas. Una propuesta cerrada para vuestro grupo. →")}</span></a>
+<a class="accent" href="{url("groups")}"><span class="kicker">B /</span><span class="h3">{L("I'm organising a group", "Organizo un grupo")}</span><span>{L("Schools, universities, clubs, companies. A closed proposal built for your group. →", "Institutos, universidades, clubs, empresas. Una propuesta cerrada para vuestro grupo. →")}</span></a>
 <a href="{url("camps")}"><span class="kicker">C /</span><span class="h3">{L("I run a surf camp", "Tengo un surf camp")}</span><span>{L("Join the SNAP partner network. →", "Únete a la red de partners de SNAP. →")}</span></a>
 </section>
 
@@ -220,7 +220,7 @@ def home():
 </section>
 
 <section class="split dark rule">
-<div class="pad"><p class="kicker orange-t">{L("How it works", "Cómo funciona")}</p><h2 class="big">{L("One enquiry.<br>One proposal.", "Una solicitud.<br>Una propuesta.")}</h2></div>
+<div class="pad"><p class="kicker accent-t">{L("How it works", "Cómo funciona")}</p><h2 class="big">{L("One enquiry.<br>One proposal.", "Una solicitud.<br>Una propuesta.")}</h2></div>
 <ol class="steps pad">
 <li><b>01</b><span>{L("You choose a trip and send us your dates, group size and surf level.", "Eliges un viaje y nos envías fechas, número de personas y nivel de surf.")}</span></li>
 <li><b>02</b><span>{L("We check availability and conditions with the accommodation.", "Comprobamos disponibilidad y condiciones con el alojamiento.")}</span></li>
@@ -249,7 +249,7 @@ def home():
 {match_cta()}
 {home_guides()}
 {ig_block()}
-<section class="pad orange closing">
+<section class="pad accent closing">
 <h2 class="mega">{L("Ready when<br>you are.", "Cuando<br>tú digas.")}</h2>
 <a class="btn btn-ink" href="{url("contact")}">{L("Send an enquiry", "Enviar solicitud")}</a>
 <p class="small">{disclaimer()}</p>
@@ -275,7 +275,7 @@ def sagres():
 <ul class="facts">
 <li>{L("Swimming pool", "Piscina")}</li><li>{L("Breakfast included", "Desayuno incluido")}</li><li>{L("Bar-restaurant", "Bar-restaurante")}</li><li>{L("Shared kitchen", "Cocina compartida")}</li><li>{L("Coworking space", "Espacio coworking")}</li><li>Yoga</li>
 </ul>
-<a class="btn btn-orange" href="#enquire">{L("Get my proposal", "Pedir mi propuesta")}</a>
+<a class="btn btn-accent" href="#enquire">{L("Get my proposal", "Pedir mi propuesta")}</a>
 </div>
 {pic("sagres-house-pool", L("Swimming pool of the surf house in Sagres", "Piscina de la surf house en Sagres"), "ph tall bl")}
 </section>
@@ -294,14 +294,14 @@ def sagres():
 <div class="packs">
 <article><p class="kicker">{L("3 nights", "3 noches")}</p><h3 class="h3">{L("1 surf day", "1 día de surf")}</h3><p>{L("3 breakfasts, 1 day of surf and transport to the spot.", "3 desayunos, 1 día de surf y transporte al spot.")}</p><a href="#enquire" data-pack="3n-1surf">{ask}</a></article>
 <article><p class="kicker">{L("5 nights", "5 noches")}</p><h3 class="h3">{L("2 surf days", "2 días de surf")}</h3><p>{L("5 breakfasts, 2 days of surf and transport to the spot.", "5 desayunos, 2 días de surf y transporte al spot.")}</p><a href="#enquire" data-pack="5n-2surf">{ask}</a></article>
-<article class="orange"><p class="kicker">{L("7 nights", "7 noches")}</p><h3 class="h3">{L("5 surf days", "5 días de surf")}</h3><p>{L("7 breakfasts, 5 days of surf with 2 sessions of 1 h 30 a day, transport to the spot, equipment, picnic and insurance.", "7 desayunos, 5 días de surf con 2 sesiones de 1 h 30 al día, transporte al spot, material, picnic y seguro.")}</p><a href="#enquire" data-pack="7n-5surf">{ask}</a></article>
+<article class="accent"><p class="kicker">{L("7 nights", "7 noches")}</p><h3 class="h3">{L("5 surf days", "5 días de surf")}</h3><p>{L("7 breakfasts, 5 days of surf with 2 sessions of 1 h 30 a day, transport to the spot, equipment, picnic and insurance.", "7 desayunos, 5 días de surf con 2 sesiones de 1 h 30 al día, transporte al spot, material, picnic y seguro.")}</p><a href="#enquire" data-pack="7n-5surf">{ask}</a></article>
 <article><p class="kicker">{L("Tailor-made", "A medida")}</p><h3 class="h3">{L("Your own mix", "Tu propia mezcla")}</h3><p>{L("Surf + yoga, retreats, team building and student groups.", "Surf + yoga, retiros, team building y grupos de estudiantes.")}</p><a href="{url("groups")}">{L("Group proposal →", "Propuesta de grupo →")}</a></article>
 </div>
 <p class="small">{disclaimer()} {L("Flights and airport transfers are not part of the packages.", "Los vuelos y los traslados desde el aeropuerto no forman parte de los packs.")}</p>
 </section>
 
 <section class="split rule" id="enquire">
-<div class="pad dark"><p class="kicker orange-t">{L("Enquire", "Solicitud")}</p><h2 class="big">{L("Tell us about your trip", "Cuéntanos tu viaje")}</h2><p class="lead">{L("No payment now. We check availability and come back with your proposal.", "Sin pagar nada ahora. Comprobamos la disponibilidad y te enviamos tu propuesta.")}</p><p><a href="{url("faq")}">{L("Questions? Read the FAQ", "¿Dudas? Lee las preguntas frecuentes")}</a></p>{mini()}</div>
+<div class="pad dark"><p class="kicker accent-t">{L("Enquire", "Solicitud")}</p><h2 class="big">{L("Tell us about your trip", "Cuéntanos tu viaje")}</h2><p class="lead">{L("No payment now. We check availability and come back with your proposal.", "Sin pagar nada ahora. Comprobamos la disponibilidad y te enviamos tu propuesta.")}</p><p><a href="{url("faq")}">{L("Questions? Read the FAQ", "¿Dudas? Lee las preguntas frecuentes")}</a></p>{mini()}</div>
 <div class="pad bl">{form("individual", f_ind(), L("Send my enquiry", "Enviar mi solicitud"), f'<input type="hidden" name="listingId" value="{LISTING}"><input type="hidden" name="packageId" value="">')}</div>
 </section>'''
 
@@ -318,7 +318,7 @@ def groups():
 <h1 class="mega">{L("Group<br>surf <mark>trips</mark>", "Viajes de surf<br>para <mark>grupos</mark>")}</h1>
 <p class="lead">{L("One closed proposal for your group: accommodation, surf lessons, meals and activities. One contact from the first email to the last wave.",
                     "Una propuesta cerrada para vuestro grupo: alojamiento, clases de surf, comidas y actividades. Un único contacto desde el primer email hasta la última ola.")}</p>
-<a class="btn btn-orange" href="#enquire">{L("Request a group proposal", "Pedir propuesta de grupo")}</a>
+<a class="btn btn-accent" href="#enquire">{L("Request a group proposal", "Pedir propuesta de grupo")}</a>
 </div>
 {pic("sagres-surf-lesson", L("Group surf lesson on the beach in the Algarve", "Clase de surf en grupo en la playa en el Algarve"), "ph tall bl", True)}
 </section>
@@ -333,7 +333,7 @@ def groups():
 {block(L("Travel agencies", "Agencias de viajes"), L("A surf product for your group catalogue.", "Un producto de surf para vuestro catálogo de grupos."))}
 </section>
 <section class="split rule" id="enquire">
-<div class="pad dark"><p class="kicker orange-t">{L("Group proposal", "Propuesta de grupo")}</p><h2 class="big">{L("Send what you know", "Envía lo que sepas")}</h2><p class="lead">{L("Only a name and an email are required. Group prices are always quoted on request.", "Solo hacen falta un nombre y un email. El precio para grupos siempre se presupuesta a medida.")}</p>{mini()}</div>
+<div class="pad dark"><p class="kicker accent-t">{L("Group proposal", "Propuesta de grupo")}</p><h2 class="big">{L("Send what you know", "Envía lo que sepas")}</h2><p class="lead">{L("Only a name and an email are required. Group prices are always quoted on request.", "Solo hacen falta un nombre y un email. El precio para grupos siempre se presupuesta a medida.")}</p>{mini()}</div>
 <div class="pad bl">{form("group", f_group(), L("Request a group proposal", "Pedir propuesta de grupo"))}</div>
 </section>'''
 
@@ -347,7 +347,7 @@ def camps():
                     "SNAP SURF TRIPS lleva grupos y viajeros particulares a surf camps y surf houses asociados. Gestionamos la solicitud, la propuesta y la coordinación de cada reserva.")}</p>
 </section>
 <section class="split rule" id="enquire">
-<div class="pad dark"><p class="kicker orange-t">Partners</p><h2 class="big">{L("Tell us about your camp", "Háblanos de tu camp")}</h2><p class="lead">{L("We will get in touch to talk about how we could work together.", "Nos pondremos en contacto para ver cómo podemos trabajar juntos.")}</p>{mini()}</div>
+<div class="pad dark"><p class="kicker accent-t">Partners</p><h2 class="big">{L("Tell us about your camp", "Háblanos de tu camp")}</h2><p class="lead">{L("We will get in touch to talk about how we could work together.", "Nos pondremos en contacto para ver cómo podemos trabajar juntos.")}</p>{mini()}</div>
 <div class="pad bl">{form("partner", f_camp(), L("Send", "Enviar"))}</div>
 </section>'''
 
@@ -630,7 +630,7 @@ def page(key):
 <meta property="og:image:alt" content="{title}">
 <meta property="og:locale" content="{L("en_GB", "es_ES")}">
 {NOINDEX}<meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#F4F1EA">
+<meta name="theme-color" content="#FFF8EE">
 <link rel="icon" href="{rel("img/favicon.png")}">
 <link rel="apple-touch-icon" href="{rel("img/favicon.png")}">
 {"".join(PRELOAD)}

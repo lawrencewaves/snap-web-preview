@@ -48,7 +48,7 @@
         var link = location.origin + location.pathname + '?r=' + best.k;
         html = '<article class="mcard"><p class="kicker">' + (shared ? '★ ' : '') + Math.round(best.s) + '% match</p><h2 class="mega">' + esc(T[best.k]) + '</h2><p class="kicker">' + esc(T.why) + '</p><ul>' +
           best.why.map(function (w) { return '<li>✓ ' + esc(T.r[w]) + '</li>'; }).join('') + '</ul><div class="row">' +
-          '<a class="btn btn-orange" href="#enquire" id="mgo">' + (M.lang === 'es' ? 'Pedir mi propuesta' : 'Request my proposal') + '</a>' +
+          '<a class="btn btn-accent" href="#enquire" id="mgo">' + (M.lang === 'es' ? 'Pedir mi propuesta' : 'Request my proposal') + '</a>' +
           '<a class="btn" href="' + M.u[best.k] + '">' + (M.lang === 'es' ? 'Ver el destino' : 'See the destination') + '</a></div>' +
           '<div class="row"><a class="btn sm" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent((M.lang === 'es' ? 'Mi surf trip ideal: ' : 'My surf trip match: ') + T[best.k] + ' ' + link) + '">WhatsApp</a>' +
           '<button class="btn sm" type="button" data-copy="' + link + '">' + (M.lang === 'es' ? 'Copiar enlace' : 'Copy link') + '</button></div></article>';
@@ -70,7 +70,7 @@
       show(a, false);
     });
     var r = new URLSearchParams(location.search).get('r');
-    if (r && M.d[r]) { mr.innerHTML = '<article class="mcard"><p class="kicker">★ ' + (M.lang === 'es' ? 'Te han compartido este destino' : 'A friend shared this match') + '</p><h2 class="mega">' + esc(T[r]) + '</h2><div class="row"><a class="btn btn-orange" href="#matcher">' + (M.lang === 'es' ? 'Haz tu test' : 'Take the test') + '</a><a class="btn" href="' + M.u[r] + '">' + (M.lang === 'es' ? 'Ver el destino' : 'See the destination') + '</a></div></article>'; mr.hidden = false; }
+    if (r && M.d[r]) { mr.innerHTML = '<article class="mcard"><p class="kicker">★ ' + (M.lang === 'es' ? 'Te han compartido este destino' : 'A friend shared this match') + '</p><h2 class="mega">' + esc(T[r]) + '</h2><div class="row"><a class="btn btn-accent" href="#matcher">' + (M.lang === 'es' ? 'Haz tu test' : 'Take the test') + '</a><a class="btn" href="' + M.u[r] + '">' + (M.lang === 'es' ? 'Ver el destino' : 'See the destination') + '</a></div></article>'; mr.hidden = false; }
   }
 
   var mb = document.querySelector('.menu-btn'), mn = document.getElementById('mainnav');
