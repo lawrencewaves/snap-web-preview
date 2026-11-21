@@ -35,6 +35,8 @@ $email = mb_strtolower($clean($d['email'] ?? '', 200));
 $name = $clean($d['name'] ?? '', 120);
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $name === '' || empty($d['consent'])) out(422, ['ok' => false, 'error' => 'required']);
 
+// Clave de idempotencia (la genera el navegador por envío): un reintento con la misma clave no crea otra solicitud
+$idem = preg_match('/^[A-Za-z0-9._-]{8,64}$/', (string)($d['idemKey'] ?? '')) ? (string)$d['idemKey'] : '';
 $fields = ['organisation', 'phone', 'country', 'people', 'dates', 'nights', 'level', 'groupType', 'ages', 'destination',
            'budget', 'needs', 'campWebsite', 'listingId', 'packageId', 'page', 'lang'];
 $e = ['type' => $type, 'name' => $name, 'email' => $email];
@@ -63,11 +65,24 @@ try {
     $db = new PDO('sqlite:' . $cfg['db']);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $db->exec('CREATE TABLE IF NOT EXISTS enquiries (id TEXT PRIMARY KEY, received_at TEXT, type TEXT, email TEXT, ip TEXT, data TEXT, mail_sent INTEGER DEFAULT 0)');
+    $db->exec('CREATE TABLE IF NOT EXISTS idem (k TEXT PRIMARY KEY, id TEXT, at TEXT)');
+    if ($idem !== '') {
+        $db->prepare('DELETE FROM idem WHERE at < ?')->execute([gmdate('c', time() - 172800)]);
+        $q = $db->prepare('SELECT id FROM idem WHERE k = ?'); $q->execute([$idem]);
+        $prev = $q->fetchColumn();
+        if ($prev) out(200, ['ok' => true, 'id' => (string)$prev]);   // ya recibida: misma respuesta, sin guardar ni enviar nada
+    }
     $q = $db->prepare("SELECT COUNT(*) FROM enquiries WHERE ip = ? AND received_at > ?");
     $q->execute([$ipHash, gmdate('c', time() - 3600)]);
     if ((int)$q->fetchColumn() >= (int)($cfg['maxPerHour'] ?? 5)) out(429, ['ok' => false, 'error' => 'rate']);
-    $db->prepare('INSERT INTO enquiries (id, received_at, type, email, ip, data) VALUES (?,?,?,?,?,?)')
-       ->execute([$id, $e['receivedAt'], $type, $email, $ipHash, json_encode($e, JSON_UNESCAPED_UNICODE)]);
+    if ($idem !== '') {   // reserva la clave antes de guardar: dos peticiones simultáneas no pueden pasar las dos
+        $r = $db->prepare('INSERT OR IGNORE INTO idem (k, id, at) VALUES (?,?,?)'); $r->execute([$idem, $id, $e['receivedAt']]);
+        if ($r->rowCount() === 0) { $q = $db->prepare('SELECT id FROM idem WHERE k = ?'); $q->execute([$idem]); out(200, ['ok' => true, 'id' => (string)$q->fetchColumn()]); }
+    }
+    try {
+        $db->prepare('INSERT INTO enquiries (id, received_at, type, email, ip, data) VALUES (?,?,?,?,?,?)')
+           ->execute([$id, $e['receivedAt'], $type, $email, $ipHash, json_encode($e, JSON_UNESCAPED_UNICODE)]);
+    } catch (Throwable $t) { if ($idem !== '') { $db->prepare('DELETE FROM idem WHERE k = ?')->execute([$idem]); } throw $t; }
     $saved = true;
 } catch (Throwable $t) { error_log('SNAP enquiry db: ' . $t->getMessage()); }
 

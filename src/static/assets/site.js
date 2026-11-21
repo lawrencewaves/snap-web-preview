@@ -96,7 +96,21 @@
   }
   document.getElementById('ok-x').addEventListener('click', function () { dlg.close ? dlg.close() : dlg.removeAttribute('open'); });
 
+  var newKey = function () { try { return crypto.randomUUID(); } catch (e) { return Date.now().toString(36) + Math.random().toString(36).slice(2, 12); } };
+
+  // Selector de destino de grupos: rellena listingId y respeta ?d=sagres|bali
+  document.querySelectorAll('select[data-dest]').forEach(function (s) {
+    var h = s.form && s.form.querySelector('[name=listingId]');
+    var apply = function () { var o = s.options[s.selectedIndex]; if (h) h.value = (o && o.getAttribute('data-listing')) || ''; };
+    var q = new URLSearchParams(location.search).get('d');
+    if (q) for (var i = 0; i < s.options.length; i++) if (s.options[i].getAttribute('data-key') === q) { s.selectedIndex = i; break; }
+    s.addEventListener('change', apply);
+    if (s.form) s.form.addEventListener('reset', function () { setTimeout(apply, 0); });
+    apply();
+  });
+
   document.querySelectorAll('form.enq').forEach(function (f) {
+    var key = newKey();   // misma clave en los reintentos del mismo envío; nueva tras un envío correcto
     f.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var err = f.querySelector('.err'), btn = f.querySelector('button[type=submit]'), bad = null;
@@ -108,7 +122,7 @@
       });
       if (bad) { err.textContent = B.req; err.hidden = false; bad.focus(); return; }
 
-      var d = { type: f.dataset.type, page: location.pathname, lang: document.documentElement.lang, utm: utm, elapsed: Math.round((Date.now() - t0) / 1000) };
+      var d = { type: f.dataset.type, page: location.pathname, lang: document.documentElement.lang, utm: utm, elapsed: Math.round((Date.now() - t0) / 1000), idemKey: key };
       new FormData(f).forEach(function (v, k) { d[k] = typeof v === 'string' ? v.trim() : v; });
       d.consent = !!f.querySelector('[name=consent]').checked;
       d.marketing = !!f.querySelector('[name=marketing]').checked;
@@ -121,7 +135,7 @@
         .then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
         .then(function (x) {
           if (x.s === 200 && x.j.ok) {
-            f.reset(); showOk(x.j.id);
+            f.reset(); key = newKey(); showOk(x.j.id);
             if (window.gtag) window.gtag('event', 'enquiry_submitted', { enquiry_type: d.type });
           } else { throw new Error(x.j.error || 'error'); }
         })

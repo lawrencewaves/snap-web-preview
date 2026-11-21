@@ -6,15 +6,19 @@ import sys, os, re, json, shutil, pathlib, datetime
 SRC = pathlib.Path(__file__).resolve().parent
 DIST = SRC.parent / "dist"
 DOMAIN = (sys.argv[1] if len(sys.argv) > 1 else "https://TU-DOMINIO.com").rstrip("/")
+PUBLIC_DOMAIN = DOMAIN
+PREVIEW_URL = os.environ.get("SNAP_PREVIEW_URL", "").rstrip("/")  # URL real de la vista previa (GitHub Pages): canonical, OG, JSON-LD y enlaces de compartir de dist/preview
 GA_ID = os.environ.get("SNAP_GA_ID", "")            # ID de Google Analytics 4. Vacío = la web no usa ninguna cookie ni muestra banner.
 LISTING = "sagres-surf-house-01"
+# Destinos activos para el selector de grupos: (clave de ?d=, texto que se envía, listingId del CRM)
+DESTS = [("sagres", "Sagres, Algarve", LISTING), ("bali", "Bali", "bali-bukit-01")]
 TODAY = datetime.date.today().isoformat()
 DIMS = json.load(open(SRC / "dims.json"))
 import hashlib
 VER = hashlib.md5(b"".join((SRC / "static/assets" / f).read_bytes() for f in ("site.css", "site.js"))).hexdigest()[:8]
 ORG = {"name": "Associació Carving's Maresme", "nif": "G66143009",
        "addr": "C/ Mossèn Cinto Verdaguer 13-15, 08329 Teià (Barcelona), Spain",
-       "email": os.environ.get("SNAP_CONTACT_EMAIL", "info@" + DOMAIN.split("//")[-1].removeprefix("www.")), "tel": "+34 618 649 171"}
+       "email": os.environ.get("SNAP_CONTACT_EMAIL", "").strip(), "tel": "+34 618 649 171"}  # sin correo operativo confirmado no se muestra ninguno
 # Redes: pon la URL cuando exista la cuenta. Vacío = icono visible como «próximamente», sin enlace.
 SOCIAL = {"instagram": "https://www.instagram.com/snap_surftrips/"}
 IG_HANDLE = "@snap_surftrips"
@@ -49,6 +53,13 @@ PATHS = {
     "cookies": ("legal/cookie-policy/", "es/legal/cookies/"),
     "terms": ("legal/terms/", "es/legal/condiciones/"),
 }
+
+
+def chan():
+    """Canal de contacto para los textos legales: el correo si existe; si no, WhatsApp y la dirección postal de la asociación (provisional, a validar con el asesor)."""
+    if ORG["email"]:
+        return ORG["email"]
+    return L(f"WhatsApp {ORG['tel']} or by post to {ORG['addr']}", f"WhatsApp {ORG['tel']} o por correo postal a {ORG['addr'].replace('Spain', 'España')}")
 
 
 def path(key, lang=None):
@@ -104,8 +115,8 @@ def form(kind, fields, cta, hidden=""):
 <label class="full">{L("Anything else we should know?", "¿Algo más que debamos saber?")}<textarea name="message" rows="4"></textarea></label>
 <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 {hidden}
-<p class="small full">{L(f"Data controller: {ORG['name']} (SNAP SURF TRIPS). Purpose: to answer your enquiry and prepare your proposal. Legal basis: steps taken at your request before a contract. Recipients: the accommodation and surf school only if you ask for a proposal or booking, and our technology providers. You can access, rectify or erase your data at {ORG['email']}.",
- f"Responsable: {ORG['name']} (SNAP SURF TRIPS). Finalidad: responder a tu solicitud y preparar tu propuesta. Base jurídica: medidas precontractuales a petición tuya. Destinatarios: el alojamiento y la escuela de surf solo si pides propuesta o reserva, y nuestros proveedores tecnológicos. Puedes acceder, rectificar o suprimir tus datos en {ORG['email']}.")} <a href="{url("privacy")}">{L("More information", "Más información")}</a>.</p>
+<p class="small full">{L(f"Data controller: {ORG['name']} (SNAP SURF TRIPS). Purpose: to answer your enquiry and prepare your proposal. Legal basis: steps taken at your request before a contract. Recipients: the accommodation and surf school only if you ask for a proposal or booking, and our technology providers. You can access, rectify or erase your data via {chan()}.",
+ f"Responsable: {ORG['name']} (SNAP SURF TRIPS). Finalidad: responder a tu solicitud y preparar tu propuesta. Base jurídica: medidas precontractuales a petición tuya. Destinatarios: el alojamiento y la escuela de surf solo si pides propuesta o reserva, y nuestros proveedores tecnológicos. Puedes acceder, rectificar o suprimir tus datos a través de {chan()}.")} <a href="{url("privacy")}">{L("More information", "Más información")}</a>.</p>
 <label class="check full"><input type="checkbox" name="consent" required><span>{L("I have read and accept the", "He leído y acepto la")} <a href="{url("privacy")}">{L("privacy policy", "política de privacidad")}</a> *</span></label>
 <label class="check full"><input type="checkbox" name="marketing"><span>{L("I want to receive surf trip news and offers by email (optional).", "Quiero recibir novedades y ofertas de viajes de surf por email (opcional).")}</span></label>
 <p class="err full" role="alert" hidden></p>
@@ -114,29 +125,36 @@ def form(kind, fields, cta, hidden=""):
 </form>'''
 
 
-def f_ind():
+def f_ind(nights=None):
     return (field(L("Name", "Nombre"), "name", req=True) + field("Email", "email", "email", True)
             + field(L("Phone / WhatsApp", "Teléfono / WhatsApp"), "phone", "tel") + field(L("Country", "País"), "country")
             + field(L("How many people?", "¿Cuántas personas?"), "people", "number", extra='min="1" max="19"')
             + field(L("Preferred dates", "Fechas preferidas"), "dates", extra=f'placeholder="{L("e.g. 10–17 May, or just June", "p. ej. 10–17 mayo, o solo junio")}"')
-            + select(L("Nights", "Noches"), "nights", ["3", "5", "7", L("Other", "Otra")])
+            + (nights or select(L("Nights", "Noches"), "nights", ["3", "5", "7", L("Other", "Otra")]))
             + select(L("Surf level", "Nivel de surf"), "level", levels())
             + f'<label class="check full"><input type="checkbox" name="flexible"><span>{L("My dates are flexible", "Mis fechas son flexibles")}</span></label>')
 
 
 def f_group():
-    return (field(L("Organisation", "Organización"), "organisation") + field(L("Contact person", "Persona de contacto"), "name", req=True)
-            + field("Email", "email", "email", True) + field(L("Phone / WhatsApp", "Teléfono / WhatsApp"), "phone", "tel")
+    opt = L("Optional", "Opcional")
+    dest = (f'<label>{L("Destination", "Destino")}<select name="destination" data-dest>'
+            f'<option value="" data-listing="" data-key=""></option>'
+            + "".join(f'<option value="{t}" data-listing="{lid}" data-key="{k}">{t}</option>' for k, t, lid in DESTS)
+            + f'<option value="{L("Not decided yet", "Aún no lo tenemos decidido")}" data-listing="" data-key="">{L("Not decided yet", "Aún no lo tenemos decidido")}</option></select></label>')
+    return ('<input type="hidden" name="listingId" value="">'
             + select(L("Type of group", "Tipo de grupo"), "groupType",
                      L(["School (16+)", "University / Erasmus", "Club / association", "Private group", "Company / team building", "Travel agency"],
                        ["Instituto o colegio (16+)", "Universidad / Erasmus", "Club / asociación", "Grupo privado", "Empresa / team building", "Agencia de viajes"]))
             + field(L("Participants (approx.)", "Participantes (aprox.)"), "people", "number", extra='min="2"')
+            + field(L("Preferred dates", "Fechas preferidas"), "dates") + dest
             + select(L("Ages", "Edades"), "ages", L(["All 18+", "16–17 with accompanying adults", "Mixed"], ["Todos +18", "16–17 con adultos acompañantes", "Mixto"]))
-            + field(L("Preferred destination", "Destino preferido"), "destination", extra='value="Sagres, Algarve"')
-            + field(L("Preferred dates", "Fechas preferidas"), "dates") + field(L("Nights", "Noches"), "nights")
-            + select(L("Surf level", "Nivel de surf"), "level", levels()) + field(L("Approx. budget per person", "Presupuesto aprox. por persona"), "budget")
-            + field(L("Accommodation, meals, transport, activities…", "Alojamiento, comidas, transporte, actividades…"), "needs").replace("<label>", "<label class=\"full\">", 1)
-            + f'<label class="check full"><input type="checkbox" name="flexible"><span>{L("Our dates are flexible", "Nuestras fechas son flexibles")}</span></label>')
+            + f'<label class="check"><input type="checkbox" name="flexible"><span>{L("Our dates are flexible", "Nuestras fechas son flexibles")}</span></label>'
+            + field(L("Contact person", "Persona de contacto"), "name", req=True) + field("Email", "email", "email", True)
+            + field(L("Phone / WhatsApp", "Teléfono / WhatsApp"), "phone", "tel") + field(L("Organisation", "Organización"), "organisation")
+            + f'<p class="kicker full">{opt}</p>'
+            + field(L("Nights", "Noches"), "nights") + select(L("Surf level", "Nivel de surf"), "level", levels())
+            + field(L("Budget you have in mind (per person)", "Presupuesto previsto (por persona)"), "budget")
+            + field(L("Accommodation, meals, transport, activities…", "Alojamiento, comidas, transporte, actividades…"), "needs").replace("<label>", "<label class=\"full\">", 1))
 
 
 def f_camp():
@@ -196,7 +214,7 @@ def home():
 <p class="mega">{L("You surf.<br>We handle<br><mark>the rest.</mark>", "Tú surfeas.<br>Nosotros,<br><mark>el resto.</mark>")}</p>
 <p class="lead">{L("Curated surf camps and surf houses for travellers and groups. Tell us when, who and your surf level: we check availability and send you one personalised proposal.",
                     "Surf camps y surf houses seleccionados para viajeros y grupos. Dinos cuándo, quiénes y vuestro nivel: comprobamos la disponibilidad y te enviamos una propuesta personalizada.")}</p>
-<div class="row"><a class="btn btn-accent" href="{url("sagres")}">{L("Find my surf trip", "Buscar mi viaje de surf")}</a><a class="btn" href="{url("groups")}">{L("I'm organising a group", "Organizo un grupo")}</a></div>
+<div class="row"><a class="btn btn-accent" href="{url("trips")}">{L("Find my surf trip", "Buscar mi viaje de surf")}</a><a class="btn" href="{url("groups")}">{L("I'm organising a group", "Organizo un grupo")}</a></div>
 </div>
 {pic("sagres-surf-blue", L("Surfer riding a wave in front of a misty sea cliff", "Surfista cogiendo una ola frente a un acantilado entre la bruma"), "ph hero-ph", True)}
 </section>
@@ -275,7 +293,7 @@ def sagres():
 <ul class="facts">
 <li>{L("Swimming pool", "Piscina")}</li><li>{L("Breakfast included", "Desayuno incluido")}</li><li>{L("Bar-restaurant", "Bar-restaurante")}</li><li>{L("Shared kitchen", "Cocina compartida")}</li><li>{L("Coworking space", "Espacio coworking")}</li><li>Yoga</li>
 </ul>
-<a class="btn btn-accent" href="#enquire">{L("Get my proposal", "Pedir mi propuesta")}</a>
+<a class="btn btn-accent" href="#enquire">{L("Get my proposal", "Pedir mi propuesta")}</a> <a class="btn" href="{url("groups", "?d=sagres#enquire")}">{L("Group proposal", "Propuesta de grupo")}</a>
 </div>
 {pic("sagres-house-pool", L("Swimming pool of the surf house in Sagres", "Piscina de la surf house en Sagres"), "ph tall bl")}
 </section>
@@ -284,7 +302,7 @@ def sagres():
 {pic("sagres-house-room", L("Private room in the surf house", "Habitación privada de la surf house"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-house-dorm", L("Shared room with bunk beds", "Habitación compartida con literas"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-house-dinner", L("Guests sharing dinner at the surf house", "Huéspedes cenando juntos en la surf house"), sizes="(max-width:860px) 50vw, 33vw")}
-{pic("sagres-yoga-beach", L("Woman meditating on a mat by the water", "Mujer meditando sobre una esterilla junto al agua"), sizes="(max-width:860px) 50vw, 33vw")}
+{pic("sagres-surf-mountain", L("Surfer standing up on a blue board in the shallows, with a cliff behind", "Surfista de pie sobre una tabla azul en la orilla, con un acantilado detrás"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-surf-lesson", L("Surf lesson on the beach near Sagres", "Clase de surf en la playa cerca de Sagres"), sizes="(max-width:860px) 50vw, 33vw")}
 {pic("sagres-coast", L("Beach and cliffs near Sagres", "Playa y acantilados cerca de Sagres"), sizes="(max-width:860px) 50vw, 33vw")}
 </section>
@@ -295,7 +313,7 @@ def sagres():
 <article><p class="kicker">{L("3 nights", "3 noches")}</p><h3 class="h3">{L("1 surf day", "1 día de surf")}</h3><p>{L("3 breakfasts, 1 day of surf and transport to the spot.", "3 desayunos, 1 día de surf y transporte al spot.")}</p><a href="#enquire" data-pack="3n-1surf">{ask}</a></article>
 <article><p class="kicker">{L("5 nights", "5 noches")}</p><h3 class="h3">{L("2 surf days", "2 días de surf")}</h3><p>{L("5 breakfasts, 2 days of surf and transport to the spot.", "5 desayunos, 2 días de surf y transporte al spot.")}</p><a href="#enquire" data-pack="5n-2surf">{ask}</a></article>
 <article class="accent"><p class="kicker">{L("7 nights", "7 noches")}</p><h3 class="h3">{L("5 surf days", "5 días de surf")}</h3><p>{L("7 breakfasts, 5 days of surf with 2 sessions of 1 h 30 a day, transport to the spot, equipment, picnic and insurance.", "7 desayunos, 5 días de surf con 2 sesiones de 1 h 30 al día, transporte al spot, material, picnic y seguro.")}</p><a href="#enquire" data-pack="7n-5surf">{ask}</a></article>
-<article><p class="kicker">{L("Tailor-made", "A medida")}</p><h3 class="h3">{L("Your own mix", "Tu propia mezcla")}</h3><p>{L("Surf + yoga, retreats, team building and student groups.", "Surf + yoga, retiros, team building y grupos de estudiantes.")}</p><a href="{url("groups")}">{L("Group proposal →", "Propuesta de grupo →")}</a></article>
+<article><p class="kicker">{L("Tailor-made", "A medida")}</p><h3 class="h3">{L("Your own mix", "Tu propia mezcla")}</h3><p>{L("Surf + yoga, retreats, team building and student groups.", "Surf + yoga, retiros, team building y grupos de estudiantes.")}</p><a href="{url("groups", "?d=sagres#enquire")}">{L("Group proposal →", "Propuesta de grupo →")}</a></article>
 </div>
 <p class="small">{disclaimer()} {L("Flights and airport transfers are not part of the packages.", "Los vuelos y los traslados desde el aeropuerto no forman parte de los packs.")}</p>
 </section>
@@ -357,7 +375,7 @@ def contact():
 <section class="split rule" id="enquire">
 <div class="pad"><h1 class="kicker">{L("Contact SNAP SURF TRIPS", "Contacto SNAP SURF TRIPS")}</h1><p class="mega">{L("Say<br><mark>hello</mark>", "Di<br><mark>hola</mark>")}</p>
 <p class="lead">{L("Questions about a surf trip? Write to us here, by email or on WhatsApp.", "¿Dudas sobre un viaje de surf? Escríbenos aquí, por email o por WhatsApp.")}</p>
-<p>Email: <a href="mailto:{ORG["email"]}">{ORG["email"]}</a><br>WhatsApp: <a href="https://wa.me/34618649171" rel="noopener">{ORG["tel"]}</a></p>{mini()}</div>
+<p>{f'Email: <a href="mailto:{ORG["email"]}">{ORG["email"]}</a><br>' if ORG["email"] else ""}WhatsApp: <a href="https://wa.me/34618649171" rel="noopener">{ORG["tel"]}</a></p>{mini()}</div>
 <div class="pad bl">{form("general", f_gen(), L("Send", "Enviar"))}</div>
 </section>'''
 
@@ -384,7 +402,7 @@ def notice():
     return legal(L("Legal notice", "Aviso legal"), L(f'''
 <h2>1. Owner of the website</h2>
 <p>In compliance with article 10 of Spanish Law 34/2002 on Information Society Services and Electronic Commerce (LSSI-CE):</p>
-<ul><li>Owner: {o["name"]} (trade name: SNAP SURF TRIPS)</li><li>Tax ID (NIF): {o["nif"]}</li><li>Registered address: {o["addr"]}</li><li>Email: {o["email"]}</li><li>Telephone: {o["tel"]}</li><li>Registration: [REGISTRY OF ASSOCIATIONS AND REGISTRATION NUMBER]</li></ul>
+<ul><li>Owner: {o["name"]} (trade name: SNAP SURF TRIPS)</li><li>Tax ID (NIF): {o["nif"]}</li><li>Registered address: {o["addr"]}</li>{f'<li>Email: {o["email"]}</li>' if o["email"] else ""}<li>Telephone: {o["tel"]}</li><li>Registration: [REGISTRY OF ASSOCIATIONS AND REGISTRATION NUMBER]</li></ul>
 <h2>2. Purpose</h2>
 <p>This website provides information about surf trips and allows users to send enquiries. SNAP SURF TRIPS manages each enquiry and coordinates the booking with the accommodation and activity providers. Sending an enquiry does not create a booking.</p>
 <h2>3. Use of the website</h2>
@@ -397,7 +415,7 @@ def notice():
 <p>This notice is governed by Spanish law. Consumers may bring claims before the courts of their place of residence.</p>''', f'''
 <h2>1. Titular del sitio web</h2>
 <p>En cumplimiento del artículo 10 de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE):</p>
-<ul><li>Titular: {o["name"]} (nombre comercial: SNAP SURF TRIPS)</li><li>NIF: {o["nif"]}</li><li>Domicilio: {o["addr"].replace("Spain", "España")}</li><li>Email: {o["email"]}</li><li>Teléfono: {o["tel"]}</li><li>Inscripción: [REGISTRO DE ASOCIACIONES Y NÚMERO DE INSCRIPCIÓN]</li></ul>
+<ul><li>Titular: {o["name"]} (nombre comercial: SNAP SURF TRIPS)</li><li>NIF: {o["nif"]}</li><li>Domicilio: {o["addr"].replace("Spain", "España")}</li>{f'<li>Email: {o["email"]}</li>' if o["email"] else ""}<li>Teléfono: {o["tel"]}</li><li>Inscripción: [REGISTRO DE ASOCIACIONES Y NÚMERO DE INSCRIPCIÓN]</li></ul>
 <h2>2. Objeto</h2>
 <p>Este sitio web ofrece información sobre viajes de surf y permite enviar solicitudes. SNAP SURF TRIPS gestiona cada solicitud y coordina la reserva con los proveedores de alojamiento y actividades. El envío de una solicitud no constituye una reserva.</p>
 <h2>3. Uso del sitio</h2>
@@ -414,7 +432,7 @@ def privacy():
     o = ORG
     return legal(L("Privacy policy", "Política de privacidad"), L(f'''
 <h2>1. Data controller</h2>
-<p>{o["name"]} (SNAP SURF TRIPS), NIF {o["nif"]}, {o["addr"]}. Contact for privacy matters: {o["email"]}.</p>
+<p>{o["name"]} (SNAP SURF TRIPS), NIF {o["nif"]}, {o["addr"]}. Contact for privacy matters: {chan()}.</p>
 <h2>2. What data we collect</h2>
 <p>The data you give us in the forms: name, email, telephone, country, organisation, and the details of your trip (dates, number of people, ages of a group, surf level, needs and budget). We also record the page from which you send the enquiry, its language and, if present in the link you followed, the campaign parameters (UTM). We do not ask for special categories of data.</p>
 <h2>3. Purposes and legal bases</h2>
@@ -426,13 +444,13 @@ def privacy():
 <h2>5. Who receives your data</h2>
 <p>The accommodation and the surf school that would provide the service, only when you ask for a proposal or a booking. Providers acting on our behalf as processors: website hosting, email and office tools (Google), CRM tools (HubSpot) and AI-assisted management tools (Anthropic). Some of them may process data outside the European Economic Area under the EU-US Data Privacy Framework or standard contractual clauses. We do not sell your data.</p>
 <h2>6. Your rights</h2>
-<p>You can exercise your rights of access, rectification, erasure, objection, restriction and portability, and withdraw your consent, by writing to {o["email"]}. You can also lodge a complaint with the Spanish Data Protection Agency (www.aepd.es).</p>
+<p>You can exercise your rights of access, rectification, erasure, objection, restriction and portability, and withdraw your consent, by contacting us via {chan()}. You can also lodge a complaint with the Spanish Data Protection Agency (www.aepd.es).</p>
 <h2>7. Minors</h2>
 <p>The forms are for adults. Trips for school groups are arranged with the school or organisation, never directly with students.</p>
 <h2>8. Security</h2>
 <p>We apply technical and organisational measures appropriate to the risk: restricted access, encrypted connections and minimisation of the data we keep.</p>''', f'''
 <h2>1. Responsable del tratamiento</h2>
-<p>{o["name"]} (SNAP SURF TRIPS), NIF {o["nif"]}, {o["addr"].replace("Spain", "España")}. Contacto para privacidad: {o["email"]}.</p>
+<p>{o["name"]} (SNAP SURF TRIPS), NIF {o["nif"]}, {o["addr"].replace("Spain", "España")}. Contacto para privacidad: {chan()}.</p>
 <h2>2. Qué datos tratamos</h2>
 <p>Los que nos facilitas en los formularios: nombre, email, teléfono, país, organización y los datos de tu viaje (fechas, número de personas, edades del grupo, nivel de surf, necesidades y presupuesto). También registramos la página desde la que envías la solicitud, su idioma y, si figuran en el enlace por el que llegaste, los parámetros de campaña (UTM). No pedimos categorías especiales de datos.</p>
 <h2>3. Finalidades y bases jurídicas</h2>
@@ -444,7 +462,7 @@ def privacy():
 <h2>5. Destinatarios</h2>
 <p>El alojamiento y la escuela de surf que prestarían el servicio, solo cuando pides una propuesta o una reserva. Proveedores que actúan por cuenta nuestra como encargados del tratamiento: alojamiento web, correo y ofimática (Google), herramientas de CRM (HubSpot) y herramientas de gestión asistida por IA (Anthropic). Algunos pueden tratar datos fuera del Espacio Económico Europeo al amparo del Marco de Privacidad de Datos UE-EE. UU. o de cláusulas contractuales tipo. No vendemos tus datos.</p>
 <h2>6. Tus derechos</h2>
-<p>Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad, y retirar tu consentimiento, escribiendo a {o["email"]}. También puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es).</p>
+<p>Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad, y retirar tu consentimiento, contactándonos a través de {chan()}. También puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es).</p>
 <h2>7. Menores</h2>
 <p>Los formularios están dirigidos a personas adultas. Los viajes de grupos escolares se gestionan con el centro u organización, nunca directamente con el alumnado.</p>
 <h2>8. Seguridad</h2>
@@ -471,14 +489,14 @@ def cookies():
 <h2>3. How to manage cookies in your browser</h2>
 <p>You can block or delete cookies from the settings of your browser (Chrome, Safari, Firefox, Edge). Blocking them does not affect the use of this website.</p>
 <h2>4. Controller</h2>
-<p>{ORG["name"]} (SNAP SURF TRIPS) · {ORG["email"]}.</p>''', f'''
+<p>{ORG["name"]} (SNAP SURF TRIPS) · {chan()}.</p>''', f'''
 <h2>1. Qué son las cookies</h2>
 <p>Las cookies son pequeños archivos que un sitio web guarda en tu dispositivo. La ley española (art. 22.2 LSSI-CE) exige tu consentimiento informado antes de instalar cualquier cookie que no sea estrictamente necesaria.</p>
 <h2>2. Cookies que utiliza este sitio</h2>{table}<p>Contamos las visitas de forma anónima en nuestro propio servidor, sin cookies ni ningún identificador: solo registramos el día, la página visitada y el origen de la campaña (por ejemplo, Instagram), de forma agregada.</p>
 <h2>3. Cómo gestionar las cookies en tu navegador</h2>
 <p>Puedes bloquear o eliminar las cookies desde la configuración de tu navegador (Chrome, Safari, Firefox, Edge). Bloquearlas no afecta al uso de este sitio.</p>
 <h2>4. Responsable</h2>
-<p>{ORG["name"]} (SNAP SURF TRIPS) · {ORG["email"]}.</p>'''))
+<p>{ORG["name"]} (SNAP SURF TRIPS) · {chan()}.</p>'''))
 
 
 def terms():
@@ -496,7 +514,7 @@ def terms():
 <h2>6. Minors</h2>
 <p>Minors travel only in groups organised by a school or organisation and accompanied by responsible adults, from the age of 16.</p>
 <h2>7. Complaints</h2>
-<p>You can send any complaint to {ORG["email"]}. We will answer as soon as possible and in any case within one month.</p>
+<p>You can send any complaint via {chan()}. We will answer as soon as possible and in any case within one month.</p>
 <h2>8. Applicable law</h2>
 <p>These terms are governed by Spanish law. Nothing in them limits the rights that consumer law grants you.</p>''', f'''
 <h2>1. Quiénes somos y qué hacemos</h2>
@@ -512,7 +530,7 @@ def terms():
 <h2>6. Menores</h2>
 <p>Los menores solo viajan en grupos organizados por un centro u organización y acompañados por adultos responsables, a partir de los 16 años.</p>
 <h2>7. Reclamaciones</h2>
-<p>Puedes enviar cualquier reclamación a {ORG["email"]}. Responderemos lo antes posible y, en todo caso, en el plazo de un mes.</p>
+<p>Puedes enviar cualquier reclamación a través de {chan()}. Responderemos lo antes posible y, en todo caso, en el plazo de un mes.</p>
 <h2>8. Legislación aplicable</h2>
 <p>Estas condiciones se rigen por la legislación española. Nada de lo aquí dispuesto limita los derechos que te reconoce la normativa de consumo.</p>'''))
 
@@ -556,7 +574,7 @@ def crumbs(key):
 
 def schema(key, title, desc):
     org = {"@type": "Organization", "@id": DOMAIN + "/#org", "name": "SNAP SURF TRIPS", "legalName": ORG["name"], "url": DOMAIN + "/",
-           "logo": DOMAIN + "/img/snap-logo.png", "email": ORG["email"], "telephone": ORG["tel"], "slogan": "You surf. We handle the rest.",
+           "logo": DOMAIN + "/img/snap-logo.png", **({"email": ORG["email"]} if ORG["email"] else {}), "telephone": ORG["tel"], "slogan": "You surf. We handle the rest.",
            "areaServed": "Worldwide", "sameAs": [u for u in (SOCIAL["instagram"],) if u], "knowsAbout": ["surf trips", "surf camps", "surf houses", "group surf trips", "Sagres", "Algarve"]}
     g = [org, {"@type": "WebPage", "@id": DOMAIN + "/" + path(key) + "#page", "url": DOMAIN + "/" + path(key), "name": title, "description": desc,
                "inLanguage": LANG, "isPartOf": {"@id": DOMAIN + "/#site"}, "dateModified": TODAY},
@@ -602,6 +620,7 @@ def page(key):
     ig_html = (f'<a href="{ig}" target="_blank" rel="noopener" aria-label="Instagram ({L("opens in a new tab", "se abre en una pestaña nueva")})">{ICON["instagram"]}</a>' if ig else
                f'<span class="soon" role="img" aria-label="Instagram ({L("coming soon", "próximamente")})" title="Instagram · {L("coming soon", "próximamente")}">{ICON["instagram"]}</span>')
     social = f'<div class="social">{ig_html}<a href="{WA}" rel="noopener" aria-label="WhatsApp">{ICON["whatsapp"]}</a></div>'
+    hcta = url(key, "#enquire") if key in ("sagres", "bali") else url("trips")  # en cada ficha, su propio formulario; en el resto, el catálogo
     cr = crumbs(key)
     crumb = "" if key == "home" else '<nav class="crumb" aria-label="Breadcrumb">' + " / ".join(f'<a href="{url(k)}">{n}</a>' for k, n in cr[:-1]) + f' / <span aria-current="page">{cr[-1][1]}</span></nav>'
     banner = "" if not GA_ID else f'''<div id="ck" class="ck" role="dialog" aria-label="Cookies" hidden>
@@ -646,11 +665,11 @@ def page(key):
 <nav id="mainnav" aria-label="{L("Main", "Principal")}">{nav}</nav>
 {langsw}
 <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mainnav"><span></span>{L("Menu", "Menú")}</button>
-<a class="btn btn-ink sm" href="{url("sagres", "#enquire")}">{L("Plan my trip", "Planear mi viaje")}</a>
+<a class="btn btn-ink sm" href="{hcta}">{L("Plan my trip", "Planear mi viaje")}</a>
 </header>
 <main id="main">{crumb}{body}</main>
 <footer class="foot">
-<div><a class="logo" href="{url("home")}">{logo}</a><p class="small">{L("Surf trips around the world for travellers and groups.", "Viajes de surf por el mundo para viajeros y grupos.")}<br>{ORG["email"]} · {ORG["tel"]}</p>{social}</div>
+<div><a class="logo" href="{url("home")}">{logo}</a><p class="small">{L("Surf trips around the world for travellers and groups.", "Viajes de surf por el mundo para viajeros y grupos.")}<br>{ORG["email"] + " · " if ORG["email"] else ""}{ORG["tel"]}</p>{social}</div>
 <nav aria-label="{L("Site", "Sitio")}"><a href="{url("trips")}">{L("Surf destinations", "Destinos de surf")}</a><a href="{url("match")}">{L("Surf trip matcher", "Encuentra tu surf trip")}</a><a href="{url("sagres")}">{L("Surf trip to Sagres", "Viaje de surf a Sagres")}</a><a href="{url("groups")}">{L("Group surf trips", "Viajes de surf para grupos")}</a><a href="{url("camps")}">{L("For surf camps", "Para surf camps")}</a><a href="{url("guides")}">{L("Surf guides", "Guías de surf")}</a><a href="{url("faq")}">FAQ</a><a href="{url("contact")}">{L("Contact", "Contacto")}</a></nav>
 <nav aria-label="Legal"><a href="{url("notice")}">{L("Legal notice", "Aviso legal")}</a><a href="{url("privacy")}">{L("Privacy policy", "Privacidad")}</a><a href="{url("cookies")}">{L("Cookie policy", "Cookies")}</a><a href="{url("terms")}">{L("Terms", "Condiciones")}</a>{cks}</nav>
 <p class="small legal-line">© {TODAY[:4]} SNAP SURF TRIPS · {L("A brand of", "Marca de")} {ORG["name"]} · NIF {ORG["nif"]}</p>
@@ -689,7 +708,7 @@ def llms():
 - Prices: no public price list. Every trip is quoted personally in a proposal, with no commitment.
 - Group surf trips: price always quoted on request. School groups from age 16, organised through the school.
 - Flights and airport transfers are not part of the packages.
-- Contact: {ORG["email"]} · WhatsApp {ORG["tel"]}
+- Contact: {ORG["email"] + " · " if ORG["email"] else ""}WhatsApp {ORG["tel"]}
 - Operator: {ORG["name"]} (brand SNAP SURF TRIPS), Barcelona, Spain.
 
 ## Pages
@@ -708,8 +727,9 @@ def llms():
 
 
 def build(out, preview):
-    global LANG, PREVIEW, CUR
+    global LANG, PREVIEW, CUR, DOMAIN
     PREVIEW = preview
+    DOMAIN = PREVIEW_URL if (preview and PREVIEW_URL) else PUBLIC_DOMAIN
     if out.exists():
         shutil.rmtree(out)
     shutil.copytree(SRC / "static", out)
@@ -739,7 +759,7 @@ def build(out, preview):
     ht.write_text(ht.read_text().replace("#CSP#", f'Header always set Content-Security-Policy "{csp}"'))
     wk = out / ".well-known"; wk.mkdir(exist_ok=True)
     exp = (datetime.date.today() + datetime.timedelta(days=365)).isoformat()
-    (wk / "security.txt").write_text(f"Contact: mailto:{ORG['email']}\nExpires: {exp}T00:00:00Z\nPreferred-Languages: es, en\nCanonical: {DOMAIN}/.well-known/security.txt\n")
+    (wk / "security.txt").write_text(f"Contact: {'mailto:' + ORG['email'] if ORG['email'] else DOMAIN + '/' + PATHS['contact'][0]}\nExpires: {exp}T00:00:00Z\nPreferred-Languages: es, en\nCanonical: {DOMAIN}/.well-known/security.txt\n")
     (out / "llms.txt").write_text(llms(), encoding="utf-8")
     (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: {DOMAIN}/sitemap.xml\n", encoding="utf-8")
     urls = ""
@@ -752,4 +772,4 @@ def build(out, preview):
 
 build(DIST / "public", False)
 build(DIST / "preview", True)
-print("ok ·", len(PAGES) * 2, "páginas · dominio:", DOMAIN)
+print("ok ·", len(PAGES) * 2, "páginas · dominio:", PUBLIC_DOMAIN, "· preview:", PREVIEW_URL or "(igual)")

@@ -1,9 +1,11 @@
-"""SNAP · paquete para subir al servidor. Uso: python3 src/release.py https://www.dominio.com
+"""SNAP · paquete para subir al servidor. Uso: SNAP_CONTACT_EMAIL=correo python3 src/release.py https://www.dominio.com
 Genera la web con el dominio, comprueba que no queda ningún «TU-DOMINIO» ni nombre de partner (lista en blocklist.txt, fuera del repo: un nombre por línea) y crea snap-web-<dominio>-<fecha>.zip
 con el contenido de dist/public (sin config.php ni datos). Ese zip se descomprime tal cual en la carpeta www del hosting."""
-import sys, subprocess, pathlib, zipfile, datetime, re
+import sys, os, subprocess, pathlib, zipfile, datetime, re
 if len(sys.argv) < 2 or "TU-DOMINIO" in sys.argv[1]:
     sys.exit("Uso: python3 src/release.py https://www.dominio.com")
+if not os.environ.get("SNAP_CONTACT_EMAIL", "").strip():
+    sys.exit("Falta SNAP_CONTACT_EMAIL (correo operativo confirmado por Robert): sin él la web no muestra correo y los textos legales usan un canal provisional")
 root = pathlib.Path(__file__).resolve().parent.parent
 subprocess.run([sys.executable, "-I", str(root / "src/build.py"), sys.argv[1]], check=True)
 pub = root / "dist/public"

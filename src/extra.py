@@ -49,7 +49,7 @@ def landing(key, kick, h1, lead, photo, alt, blocks, qa):
 {cards(blocks + common_blocks())}
 <section class="pad faq"><h2 class="big">{L("Questions", "Preguntas")}</h2>{q}</section>
 <section class="split rule" id="enquire">
-<div class="pad dark"><p class="kicker accent-t">{L("Group proposal", "Propuesta de grupo")}</p><h2 class="big">{L("Tell us about your group", "Cuéntanos sobre vuestro grupo")}</h2><p class="lead">{L("Only a name and an email are required. Group prices are always quoted on request.", "Solo hacen falta un nombre y un email. El precio para grupos siempre se presupuesta a medida.")}</p>{mini()}</div>
+<div class="pad dark"><p class="kicker accent-t">{L("Group proposal", "Propuesta de grupo")}</p><h2 class="big">{L("Send what you know", "Envía lo que sepas")}</h2><p class="lead">{L("Only a name and an email are required. Group prices are always quoted on request.", "Solo hacen falta un nombre y un email. El precio para grupos siempre se presupuesta a medida.")}</p>{mini()}</div>
 <div class="pad bl">{form("group", f_group(), L("Request a group proposal", "Pedir propuesta de grupo"))}</div>
 </section>'''
 
@@ -126,7 +126,7 @@ def guide_page(key, h1, intro, sections, photo, alt):
 <section class="pad guide-head"><p class="kicker">{L("Guide", "Guía")} · {mins} min {L("read", "de lectura")}</p><h1 class="big">{h1}</h1><p class="lead drop">{intro}</p></section>
 {pic(photo, alt, "ph pano", True, "100vw")}
 <section class="pad prose">{body}
-<p><a class="btn btn-ink" href="{url("sagres", "#enquire")}">{L("Plan my surf trip", "Planear mi viaje de surf")}</a> <a class="btn" href="{url("groups")}">{L("Group proposal", "Propuesta de grupo")}</a></p>
+<p><a class="btn btn-ink" href="{url("trips")}">{L("Surf destinations", "Destinos de surf")}</a> <a class="btn" href="{url("groups")}">{L("Group proposal", "Propuesta de grupo")}</a></p>
 <nav class="related" aria-label="{L("More guides", "Más guías")}">{related}</nav></section>
 </article>'''
 
@@ -233,7 +233,7 @@ def bali():
 <p class="lead">{L("A boutique hotel with few rooms, personal service and a coworking space. The surf spots of the Uluwatu area, like Balangan, Padang Padang and Bingin, are a short drive away. Bali airport is about 30 minutes by car.",
                     "Un hotel boutique de pocas habitaciones, trato cercano y espacio coworking. Los spots de la zona de Uluwatu, como Balangan, Padang Padang y Bingin, están a pocos minutos en coche. El aeropuerto de Bali queda a unos 30 minutos.")}</p>
 <ul class="facts">{"".join(f"<li>{x}</li>" for x in facts)}</ul>
-<a class="btn btn-accent" href="#enquire">{L("Get my proposal", "Pedir mi propuesta")}</a>
+<a class="btn btn-accent" href="#enquire">{L("Get my proposal", "Pedir mi propuesta")}</a> <a class="btn" href="{url("groups", "?d=bali#enquire")}">{L("Group proposal", "Propuesta de grupo")}</a>
 </div>
 {pic("bali-cowork-lounge", L("Shared work and lounge area with wooden tables and woven lamps", "Zona común de trabajo y descanso con mesas de madera y lámparas de fibra"), "ph tall bl")}
 </section>
@@ -248,11 +248,11 @@ def bali():
 {cards([
   (L("Who it is for", "Para quién"), L("<p>Surfers who want to combine waves and remote work, friends and small groups of up to 20 people. Adults only.</p>", "<p>Surfistas que quieren combinar olas y trabajo en remoto, amigos y grupos pequeños de hasta 20 personas. Solo adultos.</p>")),
   (L("When to go", "Cuándo ir"), L("<p>Open all year. Tell us your dates and we check availability.</p>", "<p>Abierto todo el año. Dinos tus fechas y comprobamos la disponibilidad.</p>")),
-  (L("Surfing", "El surf"), L("<p>Tell us your level. Surf options for your trip are confirmed in your personalised proposal.</p>", "<p>Cuéntanos tu nivel. Las opciones de surf de tu viaje se confirman en tu propuesta personalizada.</p>")),
+  (L("Stay, coworking and surf", "Alojamiento, coworking y surf"), L("<p>You stay and work at the hotel, which has the coworking space. Surf lessons are given by a collaborating surf school outside the hotel. Tell us your level: we confirm the surf options, dates and what is included in your personalised proposal.</p>", "<p>Te alojas y trabajas en el hotel, que tiene el espacio coworking. Las clases de surf las da una escuela de surf colaboradora, externa al hotel. Cuéntanos tu nivel: confirmamos las opciones de surf, las fechas y lo que incluye tu propuesta personalizada.</p>")),
   (L("How it works", "Cómo funciona"), L("<p>One enquiry, one proposal with the final price. Flights and airport transfers are not included unless the proposal says so.</p>", "<p>Una solicitud, una propuesta con el precio final. Los vuelos y los traslados no están incluidos salvo que la propuesta lo indique.</p>"))])}
 <section class="split rule" id="enquire">
 <div class="pad dark"><p class="kicker accent-t">{L("Enquire", "Solicitud")}</p><h2 class="big">{L("Tell us about your trip", "Cuéntanos tu viaje")}</h2><p class="lead">{L("No payment now. We check availability and come back with your proposal.", "Sin pagar nada ahora. Comprobamos la disponibilidad y te enviamos tu propuesta.")}</p>{mini()}</div>
-<div class="pad bl">{form("individual", f_ind().replace('max="19"', 'max="20"').replace('<option>3</option><option>5</option><option>7</option>', '<option>5</option><option>7</option><option>10</option><option>14</option>'), L("Send my enquiry", "Enviar mi solicitud"), '<input type="hidden" name="listingId" value="bali-bukit-01"><input type="hidden" name="destination" value="Bali">')}</div>
+<div class="pad bl">{form("individual", f_ind(field(L("Nights (approx.)", "Noches (aprox.)"), "nights")).replace('max="19"', 'max="20"'), L("Send my enquiry", "Enviar mi solicitud"), '<input type="hidden" name="listingId" value="bali-bukit-01"><input type="hidden" name="destination" value="Bali">')}</div>
 </section>'''
 
 
