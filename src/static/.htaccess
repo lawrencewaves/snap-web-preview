@@ -8,12 +8,11 @@ DirectoryIndex index.html
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
-# 1) Con SSL activo: quitar las # de estas dos líneas para forzar HTTPS
-# RewriteCond %{HTTPS} off
-# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-# 2) Una sola versión del dominio (con www). Cambiar TU-DOMINIO y quitar las #
-# RewriteCond %{HTTP_HOST} ^TU-DOMINIO\.com$ [NC]
-# RewriteRule ^ https://www.TU-DOMINIO.com%{REQUEST_URI} [L,R=301]
+# 1) HTTPS: NO activar aquí una regla con %{HTTPS} off: en Dinahosting provocó un bucle de redirecciones
+#    (ERR_TOO_MANY_REDIRECTS, 23/11/2026). El HTTPS forzado desde http:// se resolvió aparte en el servidor.
+# 2) Host canónico: build.py genera aquí la regla www → dominio sin www (funciona en producción).
+#    Si el dominio canónico lleva www, no se genera.
+#WWW2APEX#
 RewriteRule ^api/(config(\.sample)?\.php|data/) - [F,L]
 # Archivos ocultos (.git, .env…) y extensiones sensibles: prohibidos (salvo .well-known)
 RewriteRule (^|/)\.(?!well-known/) - [F,L]

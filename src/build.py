@@ -403,7 +403,7 @@ def notice():
     return legal(L("Legal notice", "Aviso legal"), L(f'''
 <h2>1. Owner of the website</h2>
 <p>In compliance with article 10 of Spanish Law 34/2002 on Information Society Services and Electronic Commerce (LSSI-CE):</p>
-<ul><li>Owner: {o["name"]} (trade name: SNAP SURF TRIPS)</li><li>Tax ID (NIF): {o["nif"]}</li><li>Registered address: {o["addr"]}</li>{f'<li>Email: {o["email"]}</li>' if o["email"] else ""}<li>Telephone: {o["tel"]}</li><li>Registration: [REGISTRY OF ASSOCIATIONS AND REGISTRATION NUMBER]</li></ul>
+<ul><li>Owner: {o["name"]} (trade name: SNAP SURF TRIPS)</li><li>Tax ID (NIF): {o["nif"]}</li><li>Registered address: {o["addr"]}</li>{f'<li>Email: {o["email"]}</li>' if o["email"] else ""}<li>Telephone: {o["tel"]}</li><li>Registration: Register of Associations, registration no. 51.354</li></ul>
 <h2>2. Purpose</h2>
 <p>This website provides information about surf trips and allows users to send enquiries. SNAP SURF TRIPS manages each enquiry and coordinates the booking with the accommodation and activity providers. Sending an enquiry does not create a booking.</p>
 <h2>3. Use of the website</h2>
@@ -416,7 +416,7 @@ def notice():
 <p>This notice is governed by Spanish law. Consumers may bring claims before the courts of their place of residence.</p>''', f'''
 <h2>1. Titular del sitio web</h2>
 <p>En cumplimiento del artículo 10 de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE):</p>
-<ul><li>Titular: {o["name"]} (nombre comercial: SNAP SURF TRIPS)</li><li>NIF: {o["nif"]}</li><li>Domicilio: {o["addr"].replace("Spain", "España")}</li>{f'<li>Email: {o["email"]}</li>' if o["email"] else ""}<li>Teléfono: {o["tel"]}</li><li>Inscripción: [REGISTRO DE ASOCIACIONES Y NÚMERO DE INSCRIPCIÓN]</li></ul>
+<ul><li>Titular: {o["name"]} (nombre comercial: SNAP SURF TRIPS)</li><li>NIF: {o["nif"]}</li><li>Domicilio: {o["addr"].replace("Spain", "España")}</li>{f'<li>Email: {o["email"]}</li>' if o["email"] else ""}<li>Teléfono: {o["tel"]}</li><li>Inscripción: Registro de Asociaciones, n.º de inscripción 51.354</li></ul>
 <h2>2. Objeto</h2>
 <p>Este sitio web ofrece información sobre viajes de surf y permite enviar solicitudes. SNAP SURF TRIPS gestiona cada solicitud y coordina la reserva con los proveedores de alojamiento y actividades. El envío de una solicitud no constituye una reserva.</p>
 <h2>3. Uso del sitio</h2>
@@ -509,7 +509,7 @@ def terms():
 <h2>3. Prices</h2>
 <p>No prices are published on this website. Every trip is quoted personally and the valid price is the one stated in the written proposal.</p>
 <h2>4. Proposal, booking and payment</h2>
-<p>After your enquiry we send you a written proposal with the services included, dates, price, payment terms, cancellation terms and the identity of the provider of the services. The booking exists only when you expressly accept that proposal and make the payment it indicates. [BOOKING, PAYMENT AND CANCELLATION TERMS: TO BE COMPLETED WITH THE LEGAL ADVISER]</p>
+<p>After your enquiry we send you a written proposal with the services included, dates, price, payment terms, cancellation terms and the identity of the provider of the services. The booking exists only when you expressly accept that proposal and make the payment it indicates. The booking, payment and cancellation terms are provided in each proposal before you accept it.</p>
 <h2>5. Travel requirements</h2>
 <p>Flights, transfers and travel insurance are not included unless the proposal says so. Each traveller is responsible for valid travel documents. Surfing is a physical activity with inherent risks; participants follow the instructions of the surf school.</p>
 <h2>6. Minors</h2>
@@ -525,7 +525,7 @@ def terms():
 <h2>3. Precios</h2>
 <p>En este sitio no se publican precios. Cada viaje se presupuesta de forma personalizada y el precio válido es el que figura en la propuesta escrita.</p>
 <h2>4. Propuesta, reserva y pago</h2>
-<p>Tras tu solicitud te enviamos una propuesta escrita con los servicios incluidos, las fechas, el precio, las condiciones de pago y de cancelación y la identidad del prestador de los servicios. La reserva solo existe cuando aceptas expresamente esa propuesta y realizas el pago que indica. [CONDICIONES DE RESERVA, PAGO Y CANCELACIÓN: A COMPLETAR CON EL ASESOR LEGAL]</p>
+<p>Tras tu solicitud te enviamos una propuesta escrita con los servicios incluidos, las fechas, el precio, las condiciones de pago y de cancelación y la identidad del prestador de los servicios. La reserva solo existe cuando aceptas expresamente esa propuesta y realizas el pago que indica. Las condiciones de reserva, pago y cancelación se facilitan en cada propuesta antes de aceptarla.</p>
 <h2>5. Requisitos del viaje</h2>
 <p>Los vuelos, los traslados y el seguro de viaje no están incluidos salvo que la propuesta lo indique. Cada viajero es responsable de llevar la documentación en regla. El surf es una actividad física con riesgos propios; los participantes siguen las indicaciones de la escuela de surf.</p>
 <h2>6. Menores</h2>
@@ -773,7 +773,10 @@ def build(out, preview):
     csp = (f"default-src 'self'; script-src 'self'{ga}; style-src 'self'; img-src 'self' data:{ga}; font-src 'self'; "
            f"connect-src 'self'{ga}; form-action 'self'; frame-ancestors 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests")
     ht = out / ".htaccess"
-    ht.write_text(ht.read_text().replace("#CSP#", f'Header always set Content-Security-Policy "{csp}"'))
+    host = PUBLIC_DOMAIN.split("//")[-1]
+    w2a = "# (host canónico con www: sin regla www → apex)" if host.startswith("www.") else (
+        "RewriteCond %{HTTP_HOST} ^www\\." + host.replace(".", "\\.") + "$ [NC]\nRewriteRule ^ https://" + host + "%{REQUEST_URI} [L,R=301]")
+    ht.write_text(ht.read_text().replace("#CSP#", f'Header always set Content-Security-Policy "{csp}"').replace("#WWW2APEX#", w2a))
     wk = out / ".well-known"; wk.mkdir(exist_ok=True)
     exp = (datetime.date.today() + datetime.timedelta(days=365)).isoformat()
     (wk / "security.txt").write_text(f"Contact: {'mailto:' + ORG['email'] if ORG['email'] else DOMAIN + '/' + PATHS['contact'][0]}\nExpires: {exp}T00:00:00Z\nPreferred-Languages: es, en\nCanonical: {DOMAIN}/.well-known/security.txt\n")

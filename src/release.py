@@ -1,6 +1,6 @@
 """SNAP · paquete para subir al servidor. Uso: SNAP_CONTACT_EMAIL=correo python3 src/release.py https://www.dominio.com
 Genera la web con el dominio, comprueba que no queda ningún «TU-DOMINIO» ni nombre de partner (lista en blocklist.txt, fuera del repo: un nombre por línea) y crea snap-web-<dominio>-<fecha>.zip
-con el contenido de dist/public (sin config.php ni datos). Ese zip se descomprime tal cual en la carpeta www del hosting."""
+con el contenido de dist/public (sin config.php, datos ni .well-known, que en el servidor es de root). Ese zip se descomprime tal cual en la carpeta www del hosting."""
 import sys, os, subprocess, pathlib, zipfile, datetime, re
 if len(sys.argv) < 2 or "TU-DOMINIO" in sys.argv[1]:
     sys.exit("Uso: python3 src/release.py https://www.dominio.com")
@@ -30,6 +30,6 @@ out = root / f"snap-web-{host}-{datetime.date.today()}.zip"
 with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
     for f in pub.rglob("*"):
         r = f.relative_to(pub)
-        if f.is_file() and r.name != "config.php" and not str(r).startswith("api/data/") or str(r) == "api/data/.htaccess":
+        if f.is_file() and r.name != "config.php" and not str(r).startswith(("api/data/", ".well-known/")) or str(r) == "api/data/.htaccess":
             z.write(f, r)
 print("Listo:", out.name, "·", sum(1 for _ in zipfile.ZipFile(out).namelist()), "archivos")
