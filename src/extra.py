@@ -11,9 +11,48 @@ EXTRA_PATHS = {
     "g_group": ("guides/how-to-organise-a-group-surf-trip/", "es/guias/como-organizar-viaje-surf-grupo/"),
     "g_pack": ("guides/surf-camp-packing-list/", "es/guias/que-llevar-surf-camp/"),
     "g_first": ("guides/first-surf-trip-beginners/", "es/guias/primer-viaje-surf-principiantes/"),
+    "g_when": ("guides/best-time-surf-trip-sagres/", "es/guias/mejor-epoca-surf-sagres/"),
+    "g_choose": ("guides/how-to-choose-a-surf-camp/", "es/guias/como-elegir-surf-camp/"),
+    "g_alone": ("guides/surf-camp-on-your-own/", "es/guias/surf-camp-viajando-solo/"),
+    "about": ("about-us/", "es/quienes-somos/"),
 }
-PARENT = {"sagres": "trips", "school": "groups", "uni": "groups", "team": "groups", "g_group": "guides", "g_pack": "guides", "g_first": "guides"}
-GUIDES = ("g_group", "g_pack", "g_first")
+PARENT = {"sagres": "trips", "school": "groups", "uni": "groups", "team": "groups", "g_group": "guides", "g_pack": "guides", "g_first": "guides",
+          "g_when": "guides", "g_choose": "guides", "g_alone": "guides"}
+GUIDES = ("g_group", "g_pack", "g_first", "g_when", "g_choose", "g_alone")
+GUIDE_PUB = {"g_group": "2026-11-21", "g_pack": "2026-11-21", "g_first": "2026-11-21", "g_when": "2026-11-23", "g_choose": "2026-11-23", "g_alone": "2026-11-23"}
+# Socios del proyecto (nombre, cargo). El segundo firma las guías. Sin datos personales más allá de lo ya público.
+PEOPLE = [("Eric Arabía", "Partner"), ("Robert Lawrence", "Partner")]
+
+
+def person(name):
+    return {"@type": "Person", "@id": DOMAIN + "/#" + name.split()[0].lower(), "name": name, "jobTitle": "Partner",
+            "url": DOMAIN + "/" + PATHS["about"][0 if LANG == "en" else 1], "worksFor": {"@id": DOMAIN + "/#org"}}
+
+
+# Enlazado interno: «sigue explorando» al final de cada página (clave → claves destino)
+RELATED = {
+    "sagres": ("bali", "groups", "g_first", "g_when"),
+    "bali": ("sagres", "groups", "g_pack", "match"),
+    "school": ("uni", "team", "g_group", "sagres"),
+    "uni": ("school", "team", "g_group", "sagres"),
+    "team": ("school", "uni", "bali", "sagres"),
+    "g_group": ("school", "uni", "team"),
+    "g_pack": ("sagres", "bali", "g_first"),
+    "g_first": ("sagres", "match", "g_alone"),
+    "g_when": ("sagres", "g_choose", "g_pack"),
+    "g_choose": ("sagres", "bali", "match"),
+    "g_alone": ("sagres", "match", "g_first"),
+    "about": ("trips", "groups", "guides"),
+}
+
+
+def related_block(key):
+    ks = RELATED.get(key)
+    if not ks:
+        return ""
+    links = "".join(f'<a href="{url(k)}">{PAGES[k][1 if LANG == "en" else 2].split(" | ")[0]} →</a>' for k in ks)
+    return f'<section class="pad prose"><p class="kicker">{L("Keep exploring", "Sigue explorando")}</p><nav class="related" aria-label="{L("Related pages", "Páginas relacionadas")}">{links}</nav></section>'
+
 PAGE_FAQ = {}
 
 
@@ -114,16 +153,21 @@ def trips():
 <a class="dcard" href="{url("sagres")}">{pic("sagres-coast", L("Beach and cliffs near Sagres", "Playa y acantilados cerca de Sagres"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Portugal · Algarve</span><span class="h2">Sagres</span><span>{L("Surf house with pool · 3, 5 and 7 nights →", "Surf house con piscina · 3, 5 y 7 noches →")}</span></a>
 <a class="dcard" href="{url("bali")}">{pic("bali-pool-day", L("Swimming pool and thatched lounge in the garden of the surf and coworking hotel in Bali", "Piscina y zona lounge con techo de palma en el jardín del hotel de surf y coworking en Bali"), sizes="(max-width:860px) 100vw, 50vw")}<span class="kicker">Indonesia · Bali</span><span class="h2">Bali</span><span>{L("Surf &amp; coworking hotel · all year · up to 20 →", "Hotel de surf y coworking · todo el año · hasta 20 →")}</span></a>
 <a class="dcard soon" href="{url("contact")}"><span class="kicker">{L("Coming soon", "Muy pronto")}</span><span class="h2">{L("New destinations", "Nuevos destinos")}</span><span>{L("We are adding new surf camps. Ask us where you would like to go →", "Estamos sumando nuevos surf camps. Dinos adónde te gustaría ir →")}</span></a>
-</section>'''
+</section>
+<section class="pad prose"><h2>{L("Which destination fits you?", "¿Qué destino encaja contigo?")}</h2>
+<p>{L("Sagres is an Atlantic surf town in the Algarve, in southern Portugal. The surf house has a pool, private and shared rooms, breakfast and its own surf school, and is open from March to December. It suits beginners, friends, school and university groups and teams.", "Sagres es un pueblo de surf atlántico en el Algarve, al sur de Portugal. La surf house tiene piscina, habitaciones privadas y compartidas, desayuno y escuela de surf propia, y abre de marzo a diciembre. Encaja con principiantes, grupos de amigos, grupos de institutos y universidades y equipos de empresa.")}</p>
+<p>{L("Bali (Bukit peninsula, Uluwatu area) is open all year and works well for travellers who want to combine surf and remote work: a boutique hotel with coworking, pool and breakfast, for adults and small groups of up to 20.", "Bali (península de Bukit, zona de Uluwatu) abre todo el año y funciona bien para quien quiere combinar surf y trabajo remoto: hotel boutique con coworking, piscina y desayuno, para adultos y grupos pequeños de hasta 20 personas.")}</p>
+<p>{L("Not sure? Use the", "¿No lo tienes claro? Usa el")} <a href="{url("match")}">{L("surf trip matcher", "buscador de surf trip")}</a> {L("or send one enquiry: we recommend the camp that fits your dates and level.", "o envía una solicitud: te recomendamos el camp que encaja con tus fechas y tu nivel.")}</p></section>'''
 
 
 def guide_page(key, h1, intro, sections, photo, alt):
     body = "".join(f"<h2>{h}</h2>{t}" for h, t in sections)
     mins = max(2, round(len(re.findall(r"\w+", re.sub("<[^>]+>", " ", intro + body))) / 200))
-    related = "".join(f'<a href="{url(k)}">{PAGES[k][1 if LANG == "en" else 2].split(" | ")[0]} →</a>' for k in GUIDES if k != key)
+    related = "".join(f'<a href="{url(k)}">{PAGES[k][1 if LANG == "en" else 2].split(" | ")[0]} →</a>' for k in [g for g in GUIDES if g != key][:3])
+    by = f'<p class="small">{L("By", "Por")} <a href="{url("about")}">{PEOPLE[1][0]}</a>, {L("partner at SNAP SURF TRIPS", "socio de SNAP SURF TRIPS")} · {L("Updated", "Actualizado")} <time datetime="{LM}">{LM}</time></p>'
     return f'''
 <article>
-<section class="pad guide-head"><p class="kicker">{L("Guide", "Guía")} · {mins} min {L("read", "de lectura")}</p><h1 class="big">{h1}</h1><p class="lead drop">{intro}</p></section>
+<section class="pad guide-head"><p class="kicker">{L("Guide", "Guía")} · {mins} min {L("read", "de lectura")}</p><h1 class="big">{h1}</h1><p class="lead drop">{intro}</p>{by}</section>
 {pic(photo, alt, "ph pano", True, "100vw")}
 <section class="pad prose">{body}
 <p><a class="btn btn-ink" href="{url("trips")}">{L("Surf destinations", "Destinos de surf")}</a> <a class="btn" href="{url("groups")}">{L("Group proposal", "Propuesta de grupo")}</a></p>
@@ -165,15 +209,18 @@ def g_first():
 
 def guides():
     items = "".join(f'<a class="dcard" href="{url(k)}">{pic(ph, "", sizes="(max-width:860px) 100vw, 33vw")}<span class="kicker">{L("Guide", "Guía")}</span><span class="h3">{PAGES[k][1 if LANG == "en" else 2].split(" | ")[0]}</span></a>'
-                    for k, ph in (("g_group", "sagres-surf-group"), ("g_pack", "sagres-surf-blue"), ("g_first", "sagres-surf-lesson")))
+                    for k, ph in (("g_group", "sagres-surf-group"), ("g_pack", "sagres-surf-blue"), ("g_first", "sagres-surf-lesson"), ("g_when", "sagres-coast-aerial"), ("g_choose", "sagres-cliffs-van"), ("g_alone", "sagres-house-dinner")))
     return f'''
 <section class="pad"><h1 class="kicker">{L("Surf trip guides", "Guías de viajes de surf")}</h1><p class="mega">{L("Surf<br><mark>guides</mark>", "Guías<br>de <mark>surf</mark>")}</p>
 <p class="lead">{L("Practical guides to plan a surf trip, alone, with friends or with a group.", "Guías prácticas para planear un viaje de surf, por tu cuenta, con amigos o en grupo.")}</p></section>
-<section class="pad dest three-up">{items}</section>'''
+<section class="pad dest three-up">{items}</section>
+<section class="pad prose"><h2>{L("How these guides work", "Cómo son estas guías")}</h2>
+<p>{L("They cover the questions we hear most before a surf trip: how to organise a group, what to pack, what a first surf week looks like, when to go to Sagres, how to choose a surf camp and how to travel alone.", "Responden a las preguntas que más oímos antes de un viaje de surf: cómo organizar un grupo, qué llevar, cómo es una primera semana de surf, cuándo ir a Sagres, cómo elegir un surf camp y cómo viajar solo.")}</p>
+<p>{L("New to surfing? Start with", "¿Nunca has surfeado? Empieza por")} <a href="{url("g_first")}">{L("your first surf trip", "tu primer viaje de surf")}</a>. {L("Organising a school, university or company trip? Read", "¿Organizas un viaje de instituto, universidad o empresa? Lee")} <a href="{url("g_group")}">{L("how to organise a group surf trip", "cómo organizar un viaje de surf en grupo")}</a>.</p></section>'''
 
 
 def home_guides():
-    items = "".join(f'<a href="{url(k)}"><span class="kicker">{L("Guide", "Guía")}</span><span class="h3">{PAGES[k][1 if LANG == "en" else 2].split(" | ")[0]}</span><span>{L("Read →", "Leer →")}</span></a>' for k in GUIDES)
+    items = "".join(f'<a href="{url(k)}"><span class="kicker">{L("Guide", "Guía")}</span><span class="h3">{PAGES[k][1 if LANG == "en" else 2].split(" | ")[0]}</span><span>{L("Read →", "Leer →")}</span></a>' for k in GUIDES[:3])
     return f'<section class="pad"><div class="head"><h2 class="big">{L("Surf guides", "Guías de surf")}</h2><a class="kicker" href="{url("guides")}">{L("All guides →", "Todas las guías →")}</a></div></section><section class="three">{items}</section>'
 
 
@@ -181,7 +228,7 @@ def ig_block():
     ig = SOCIAL["instagram"]
     if not ig:
         return ""
-    tiles = "".join(f'<a href="{ig}" target="_blank" rel="noopener" class="igt">{pic(p, "", sizes="(max-width:860px) 33vw, 16vw")}</a>' for p in ("sagres-surf-mountain", "bali-pool-day", "sagres-coast-aerial", "bali-terrace", "sagres-sunset", "bali-pool-night"))
+    tiles = "".join(f'<a href="{ig}" target="_blank" rel="noopener" class="igt" aria-label="{L("SNAP SURF TRIPS on Instagram", "SNAP SURF TRIPS en Instagram")} ({L("opens in a new tab", "se abre en una pestaña nueva")})">{pic(p, "", sizes="(max-width:860px) 33vw, 16vw")}</a>' for p in ("sagres-surf-mountain", "bali-pool-day", "sagres-coast-aerial", "bali-terrace", "sagres-sunset", "bali-pool-night"))
     return f'<section class="pad"><div class="head"><h2 class="big">{L("Follow the swell", "Síguenos")}</h2><a class="btn" href="{ig}" target="_blank" rel="noopener">{IG_HANDLE} · Instagram</a></div><div class="igrid">{tiles}</div></section>'
 
 
@@ -203,6 +250,110 @@ EXTRA_PAGES = {
     "g_first": (g_first, "Your First Surf Trip: What to Expect | SNAP SURF TRIPS", "Tu primer viaje de surf: qué esperar | SNAP SURF TRIPS",
                 "Never surfed? What a first surf week looks like: lessons on the sand, sessions of 1 h 30, safety and progress.", "¿Nunca has surfeado? Así es una primera semana de surf: clases en la arena, sesiones de 1 h 30, seguridad y progreso.", "First surf trip", "Primer viaje de surf"),
 }
+
+
+# ---------- guías nuevas (23/11): solo hechos del CRM/web + consejos generales; sin precios (R-003) ni nombres de camps (R-006) ----------
+def g_when():
+    return guide_page("g_when", L("When to go on a surf trip to Sagres: month by month", "Cuándo ir de viaje de surf a Sagres: mes a mes"),
+        L("The surf house in Sagres is open from March to December. Each part of that season feels different, so the best month depends on your level, how much you mind the cold and whether you prefer quiet beaches or the summer buzz.",
+          "La surf house de Sagres abre de marzo a diciembre. Cada tramo de esa temporada es distinto, así que el mejor mes depende de tu nivel, de lo que te importe el frío y de si prefieres playas tranquilas o el ambiente del verano."),
+        [(L("Spring (March to May)", "Primavera (marzo a mayo)"), L("<p>The Atlantic is still lively after winter, so you can find good waves. Mornings are fresh and the beaches are quiet. A good choice if you already surf or if you want to avoid the crowds. Pack layers: the weather can change from one day to the next.</p>",
+                                                                  "<p>El Atlántico sigue activo después del invierno, así que se pueden encontrar buenas olas. Las mañanas son frescas y las playas están tranquilas. Buena opción si ya surfeas o si quieres evitar las aglomeraciones. Lleva capas: el tiempo puede cambiar de un día para otro.</p>")),
+         (L("Summer (June to August)", "Verano (junio a agosto)"), L("<p>Usually the warmest weather and the busiest weeks. Waves are generally smaller, which many beginners find easier. The wind often picks up in the afternoon, so mornings tend to give the cleanest conditions. Group proposals run until July and resume in mid-September.</p>",
+                                                                  "<p>Suele ser el tiempo más cálido y las semanas con más gente. Las olas son por lo general más pequeñas, algo que a muchos principiantes les resulta más fácil. El viento suele levantarse por la tarde, así que las mañanas suelen dar las condiciones más limpias. Las propuestas de grupo llegan hasta julio y se retoman a mediados de septiembre.</p>")),
+         (L("Autumn (September to November)", "Otoño (septiembre a noviembre)"), L("<p>Many surfers see autumn as the sweet spot: the sea still holds the warmth of summer, the swell becomes more regular and there are fewer people. It works for first lessons and for surfers who want to progress.</p>",
+                                                                              "<p>Muchos surfistas ven el otoño como el mejor momento: el mar aún conserva el calor del verano, el oleaje se vuelve más regular y hay menos gente. Funciona tanto para las primeras clases como para quien quiere progresar.</p>")),
+         (L("December", "Diciembre"), L("<p>The house stays open until December. Expect the biggest swell and the coolest weather of the season: better if you have some experience or if you are happy to let your instructors choose the spot.</p>",
+                                      "<p>La casa sigue abierta hasta diciembre. Es habitual encontrar el oleaje más grande y el tiempo más fresco de la temporada: mejor si tienes algo de experiencia o si te fías de tus monitores para elegir el spot.</p>")),
+         (L("Whatever the month, the spot changes every day", "Sea el mes que sea, el spot cambia cada día"),
+          L("<p>The Sagres peninsula has coastline facing west and south, so instructors can usually choose a beach that suits that day's swell and wind. You only need to choose your dates. The Atlantic is cool all year, so a wetsuit is part of every session.</p>",
+            "<p>La península de Sagres tiene costa orientada al oeste y al sur, así que los monitores suelen poder elegir una playa que encaje con el oleaje y el viento de ese día. Tú solo tienes que elegir las fechas. El Atlántico es fresco todo el año, así que el neopreno forma parte de cada sesión.</p>")),
+         (L("How to choose your dates", "Cómo elegir tus fechas"),
+          L("<p>Give two or three options if you can, and remember that flights are not part of the packages. Send what you know in one enquiry from the <a href=\"" + url("sagres") + "\">Sagres page</a>: we check availability and reply with a personalised proposal.</p>",
+            "<p>Si puedes, indica dos o tres opciones, y recuerda que los vuelos no forman parte de los packs. Envía lo que sepas en una sola solicitud desde la <a href=\"" + url("sagres") + "\">página de Sagres</a>: comprobamos la disponibilidad y te respondemos con una propuesta personalizada.</p>"))],
+        "sagres-coast-aerial", L("Aerial view of a sandy beach with waves, rocky points and cliffs on the Algarve coast", "Vista aérea de una playa con olas, puntas rocosas y acantilados en la costa del Algarve"))
+
+
+def g_choose():
+    return guide_page("g_choose", L("How to choose a surf camp: 7 things to check", "Cómo elegir un surf camp: 7 cosas que comprobar"),
+        L("Surf camps can look alike from the outside. These seven points make the difference between a good week and a disappointing one. Use them to compare any camp you are considering.",
+          "Desde fuera, los surf camps pueden parecerse mucho. Estos siete puntos marcan la diferencia entre una buena semana y una decepcionante. Úsalos para comparar cualquier camp que estés valorando."),
+        [(L("1. Level and lessons", "1. Nivel y clases"), L("<p>Lessons should be organised by level, from complete beginners to intermediate surfers. Ask how many students there are per instructor and how long each session lasts. On the 7-night surf package in Sagres, sessions last 1 h 30, twice a day.</p>",
+                                                            "<p>Las clases deben organizarse por niveles, desde quien empieza de cero hasta surfistas intermedios. Pregunta cuántos alumnos hay por monitor y cuánto dura cada sesión. En el pack de surf de 7 noches en Sagres, las sesiones duran 1 h 30, dos al día.</p>")),
+         (L("2. Equipment", "2. Material"), L("<p>Check whether the board and the wetsuit are included in the price or rented separately, and whether the boards are suitable for your level.</p>",
+                                           "<p>Comprueba si la tabla y el neopreno están incluidos en el precio o se alquilan aparte, y si las tablas son adecuadas para tu nivel.</p>")),
+         (L("3. Where you surf", "3. Dónde surfeas"), L("<p>Is there transport to the spot? Do the instructors choose the beach each day according to the swell and the wind? A camp that surfs the same beach whatever the conditions is a warning sign.</p>",
+                                                      "<p>¿Hay transporte al spot? ¿Eligen los monitores la playa cada día según el oleaje y el viento? Un camp que surfea siempre en la misma playa, sean cuales sean las condiciones, es una señal de alerta.</p>")),
+         (L("4. Accommodation", "4. Alojamiento"), L("<p>Private rooms, shared rooms or both; common areas; swimming pool; breakfast included or not. Choose according to whether you want to meet people or to rest after the sessions.</p>",
+                                                   "<p>Habitaciones privadas, compartidas o ambas; zonas comunes; piscina; desayuno incluido o no. Elige según si quieres conocer gente o descansar después de las sesiones.</p>")),
+         (L("5. Safety and insurance", "5. Seguridad y seguro"), L("<p>Ask what insurance is included, who supervises the sessions and what the rules are for minors. School groups travel from age 16, organised by the school.</p>",
+                                                                "<p>Pregunta qué seguro está incluido, quién supervisa las sesiones y qué normas hay para menores. Los grupos escolares viajan desde los 16 años, organizados por el centro.</p>")),
+         (L("6. Season and dates", "6. Temporada y fechas"), L("<p>Check that the camp is open when you want to travel and whether group dates differ from individual ones. See the <a href=\"" + url("g_when") + "\">month-by-month guide to Sagres</a>.</p>",
+                                                              "<p>Comprueba que el camp esté abierto cuando quieres viajar y si las fechas de grupo difieren de las individuales. Mira la <a href=\"" + url("g_when") + "\">guía mes a mes de Sagres</a>.</p>")),
+         (L("7. A clear written price", "7. Un precio claro y por escrito"), L("<p>Ask for a written proposal that lists what is included, the payment terms, the cancellation terms and who provides each service. Flights and airport transfers are usually extra: they are not part of our packages.</p>",
+                                                                              "<p>Pide una propuesta por escrito que detalle qué está incluido, las condiciones de pago, las de cancelación y quién presta cada servicio. Los vuelos y los traslados al aeropuerto suelen ir aparte: no forman parte de nuestros packs.</p>")),
+         (L("How SNAP helps", "Cómo ayuda SNAP"), L("<p>You send one enquiry, we check availability with the camp and you receive one personalised proposal that answers these points. Sending an enquiry is not a booking.</p>",
+                                                  "<p>Envías una solicitud, comprobamos la disponibilidad con el camp y recibes una propuesta personalizada que responde a estos puntos. Enviar una solicitud no es una reserva.</p>"))],
+        "sagres-cliffs-van", L("Van parked on the cliffs near Sagres", "Furgoneta en los acantilados cerca de Sagres"))
+
+
+def g_alone():
+    return guide_page("g_alone", L("Can you go to a surf camp on your own?", "¿Se puede ir solo a un surf camp?"),
+        L("Yes, and it is common. A surf camp is built for meeting people: shared lessons, shared meals and common areas. This is how to make the most of it when you travel alone.",
+          "Sí, y es habitual. Un surf camp está pensado para conocer gente: clases compartidas, comidas compartidas y zonas comunes. Así puedes sacarle el máximo partido si viajas solo."),
+        [(L("Lessons are by level, not by group of friends", "Las clases son por nivel, no por grupo de amigos"), L("<p>You are placed with people at your own level, so being alone makes no difference in the water. Tell us your real level in the enquiry: it is the most useful thing you can share.</p>",
+                                                                                                                  "<p>Te colocan con gente de tu nivel, así que ir solo no cambia nada en el agua. Cuéntanos tu nivel real en la solicitud: es lo más útil que puedes decirnos.</p>")),
+         (L("Choose your room", "Elige tu habitación"), L("<p>The surf house in Sagres has private and shared rooms. A shared room is the easiest way to meet people; a private room gives you space to rest after a day of surf. Your proposal sets out the options.</p>",
+                                                        "<p>La surf house de Sagres tiene habitaciones privadas y compartidas. Una habitación compartida es la forma más fácil de conocer gente; una privada te da espacio para descansar después de un día de surf. Tu propuesta detalla las opciones.</p>")),
+         (L("Meeting people", "Conocer gente"), L("<p>Meals, the pool and the common areas are where conversations start. Say hello on the first evening: it is the easiest moment to join a table for dinner.</p>",
+                                                "<p>Las comidas, la piscina y las zonas comunes son donde empiezan las conversaciones. Saluda la primera tarde: es el momento más fácil para unirte a una mesa a la hora de cenar.</p>")),
+         (L("Choose the length", "Elige la duración"), L("<p>There are packages of 3, 5 and 7 nights. If it is your first time, the 7-night format with five surf days gives you the most time in the water; 3 or 5 nights suit a shorter trip.</p>",
+                                                       "<p>Hay packs de 3, 5 y 7 noches. Si es tu primera vez, el formato de 7 noches con cinco días de surf te da más tiempo en el agua; 3 o 5 noches encajan en un viaje más corto.</p>")),
+         (L("Pack light, plan the rest", "Viaja ligero y planifica el resto"), L("<p>Use the <a href=\"" + url("g_pack") + "\">packing list</a> and remember that flights and airport transfers are not part of the packages. New to surfing? Read <a href=\"" + url("g_first") + "\">what to expect on your first surf trip</a>.</p>",
+                                                                              "<p>Usa la <a href=\"" + url("g_pack") + "\">lista de qué llevar</a> y recuerda que los vuelos y los traslados al aeropuerto no forman parte de los packs. ¿Nunca has surfeado? Lee <a href=\"" + url("g_first") + "\">qué esperar de tu primer viaje de surf</a>.</p>")),
+         (L("How to ask", "Cómo pedirlo"), L("<p>Send one enquiry from the <a href=\"" + url("sagres") + "\">Sagres page</a> with your dates and level. We reply with a personalised proposal, with no commitment.</p>",
+                                           "<p>Envía una solicitud desde la <a href=\"" + url("sagres") + "\">página de Sagres</a> con tus fechas y tu nivel. Te respondemos con una propuesta personalizada, sin compromiso.</p>"))],
+        "sagres-house-dinner", L("Guests sharing dinner at the surf house", "Huéspedes cenando juntos en la surf house"))
+
+
+# ---------- Quiénes somos (solo en el menú del pie) ----------
+def about():
+    eric, robert = PEOPLE[0][0], PEOPLE[1][0]
+    team = [
+        (L("What we do", "Qué hacemos"), L("<p>We are a commercial agent for surf camps and surf houses. You send one enquiry with your dates, your group and your surf level; we check availability with the camp and send you one personalised proposal. Sending an enquiry is not a booking.</p>",
+                                          "<p>Somos un agente comercial de surf camps y surf houses. Nos envías una solicitud con tus fechas, tu grupo y tu nivel de surf; comprobamos la disponibilidad con el camp y te enviamos una propuesta personalizada. Enviar una solicitud no es una reserva.</p>")),
+        (f"{eric} · {L('Partner', 'Socio')}", L("<p>Has managed a surf camp in the Algarve, day to day, welcoming surfers from all over the world.</p>",
+                                                "<p>Ha dirigido el día a día de un surf camp en el Algarve, recibiendo a surfistas de todo el mundo.</p>")),
+        (f"{robert} · {L('Partner', 'Socio')}", L("<p>Has managed a surf school in the Algarve: lessons, levels and safety on the water.</p>",
+                                                  "<p>Ha dirigido una escuela de surf en el Algarve: clases, niveles y seguridad en el agua.</p>")),
+        (L("How we work", "Cómo trabajamos"), L("<ul><li><b>Surfers first:</b> we match the camp to your level and your group.</li><li><b>Honest proposals:</b> one closed proposal with what is included. No commitment until you accept it.</li><li><b>Camps we know:</b> we only offer surf camps we work with directly.</li><li><b>Active life and nature:</b> surf is sport, sea and friends in the same week.</li><li><b>One contact:</b> from your first email to the last wave.</li></ul>",
+                                                "<ul><li><b>Primero el surfista:</b> elegimos el camp según tu nivel y tu grupo.</li><li><b>Propuestas honestas:</b> una propuesta cerrada con lo que incluye. Sin compromiso hasta que la aceptes.</li><li><b>Camps que conocemos:</b> solo ofrecemos surf camps con los que trabajamos directamente.</li><li><b>Vida activa y naturaleza:</b> el surf es deporte, mar y amigos en la misma semana.</li><li><b>Un único contacto:</b> desde tu primer email hasta la última ola.</li></ul>")),
+        (L("Who is behind SNAP SURF TRIPS", "Quién está detrás de SNAP SURF TRIPS"), L(f"<p>SNAP SURF TRIPS is a brand of {ORG['name']}, based in Teià (Barcelona), Spain. Legal details are in the <a href=\"{url('notice')}\">legal notice</a>.</p>",
+                                                                                      f"<p>SNAP SURF TRIPS es una marca de {ORG['name']}, con sede en Teià (Barcelona). Los datos legales están en el <a href=\"{url('notice')}\">aviso legal</a>.</p>")),
+    ]
+    return f'''
+<section class="split rule">
+<div class="pad"><p class="kicker">{L("About us", "Quiénes somos")}</p><h1 class="big">{L("Who we <mark>are</mark>", "Quiénes <mark>somos</mark>")}</h1>
+<p class="lead">{L(f"SNAP SURF TRIPS is run by two partners, {eric} and {robert}, who have spent years running surf camps in the Algarve and living with surfers from all over the world. We know what a good surf week needs.",
+                    f"SNAP SURF TRIPS la llevan dos socios, {eric} y {robert}, que han pasado años dirigiendo surf camps en el Algarve y conviviendo con surfistas de todo el mundo. Sabemos lo que necesita una buena semana de surf.")}</p>
+<p><a class="btn btn-accent" href="{url("trips")}">{L("Surf destinations", "Destinos de surf")}</a> <a class="btn" href="{url("contact")}">{L("Contact us", "Contacta con nosotros")}</a></p></div>
+{pic("sagres-surf-group", L("Surf group on the beach in the Algarve", "Grupo de surf en la playa del Algarve"), "ph tall", True)}
+</section>
+{cards(team)}'''
+
+
+EXTRA_PAGES["g_when"] = (g_when, "Best Time for a Surf Trip to Sagres, Month by Month | SNAP", "Mejor época para un viaje de surf a Sagres, mes a mes | SNAP",
+    "When to go surfing in Sagres: what spring, summer, autumn and December are like, for beginners and experienced surfers, and how to pick your dates.",
+    "Cuándo ir a surfear a Sagres: cómo son la primavera, el verano, el otoño y diciembre, para principiantes y surfistas con experiencia, y cómo elegir tus fechas.", "Best time for Sagres", "Mejor época en Sagres")
+EXTRA_PAGES["g_choose"] = (g_choose, "How to Choose a Surf Camp: 7 Things to Check | SNAP", "Cómo elegir un surf camp: 7 cosas que comprobar | SNAP",
+    "A checklist to compare surf camps: lessons and level, equipment, spot, rooms, safety and insurance, season and a clear written price.",
+    "Una lista para comparar surf camps: clases y nivel, material, spot, habitaciones, seguridad y seguro, temporada y un precio claro por escrito.", "How to choose a surf camp", "Cómo elegir un surf camp")
+EXTRA_PAGES["g_alone"] = (g_alone, "Surf Camp on Your Own: Tips for Solo Travellers | SNAP", "Surf camp viajando solo: consejos para ir por tu cuenta | SNAP",
+    "Can you go to a surf camp alone? Yes. How lessons, rooms and meals work for solo travellers, and how to choose your trip length.",
+    "¿Se puede ir solo a un surf camp? Sí. Cómo funcionan las clases, las habitaciones y las comidas si viajas solo, y cómo elegir la duración del viaje.", "Surf camp on your own", "Surf camp en solitario")
+EXTRA_PAGES["about"] = (about, "About SNAP SURF TRIPS: Who We Are | SNAP", "Quiénes somos: el equipo de SNAP SURF TRIPS | SNAP",
+    "Meet the two partners behind SNAP SURF TRIPS: experience running surf camps in the Algarve and one personalised proposal for every trip.",
+    "Conoce a los dos socios de SNAP SURF TRIPS: experiencia dirigiendo surf camps en el Algarve y una propuesta personalizada para cada viaje.", "About us", "Quiénes somos")
 
 
 # ---------- Bali (listing bali-bukit-01) ----------

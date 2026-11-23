@@ -13,6 +13,7 @@ LISTING = "sagres-surf-house-01"
 # Destinos activos para el selector de grupos: (clave de ?d=, texto que se envía, listingId del CRM)
 DESTS = [("sagres", "Sagres, Algarve", LISTING), ("bali", "Bali", "bali-bukit-01")]
 TODAY = datetime.date.today().isoformat()
+LM = "@@LM@@"  # marcador de «última modificación»: se sustituye al generar por la fecha real en que cambió esa página (src/lastmod.json)
 DIMS = json.load(open(SRC / "dims.json"))
 import hashlib
 VER = hashlib.md5(b"".join((SRC / "static/assets" / f).read_bytes() for f in ("site.css", "site.js"))).hexdigest()[:8]
@@ -116,7 +117,7 @@ def form(kind, fields, cta, hidden=""):
 <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 {hidden}
 <p class="small full">{L(f"Data controller: {ORG['name']} (SNAP SURF TRIPS). Purpose: to answer your enquiry and prepare your proposal. Legal basis: steps taken at your request before a contract. Recipients: the accommodation and surf school only if you ask for a proposal or booking, and our technology providers. You can access, rectify or erase your data via {chan()}.",
- f"Responsable: {ORG['name']} (SNAP SURF TRIPS). Finalidad: responder a tu solicitud y preparar tu propuesta. Base jurídica: medidas precontractuales a petición tuya. Destinatarios: el alojamiento y la escuela de surf solo si pides propuesta o reserva, y nuestros proveedores tecnológicos. Puedes acceder, rectificar o suprimir tus datos a través de {chan()}.")} <a href="{url("privacy")}">{L("More information", "Más información")}</a>.</p>
+ f"Responsable: {ORG['name']} (SNAP SURF TRIPS). Finalidad: responder a tu solicitud y preparar tu propuesta. Base jurídica: medidas precontractuales a petición tuya. Destinatarios: el alojamiento y la escuela de surf solo si pides propuesta o reserva, y nuestros proveedores tecnológicos. Puedes acceder, rectificar o suprimir tus datos a través de {chan()}.")} <a href="{url("privacy")}">{L("Read the privacy policy", "Lee la política de privacidad")}</a>.</p>
 <label class="check full"><input type="checkbox" name="consent" required><span>{L("I have read and accept the", "He leído y acepto la")} <a href="{url("privacy")}">{L("privacy policy", "política de privacidad")}</a> *</span></label>
 <label class="check full"><input type="checkbox" name="marketing"><span>{L("I want to receive surf trip news and offers by email (optional).", "Quiero recibir novedades y ofertas de viajes de surf por email (opcional).")}</span></label>
 <p class="err full" role="alert" hidden></p>
@@ -393,7 +394,7 @@ def faq():
 
 
 def legal(title, html):
-    return f'''<section class="pad rule"><p class="kicker">Legal</p><h1 class="big">{title}</h1><p class="small">{L("Last updated", "Última actualización")}: {TODAY}{L(" · The Spanish version prevails.", "")}</p></section>
+    return f'''<section class="pad rule"><p class="kicker">Legal</p><h1 class="big">{title}</h1><p class="small">{L("Last updated", "Última actualización")}: {LM}{L(" · The Spanish version prevails.", "")}</p></section>
 <section class="pad prose">{html}</section>'''
 
 
@@ -575,9 +576,9 @@ def crumbs(key):
 def schema(key, title, desc):
     org = {"@type": "Organization", "@id": DOMAIN + "/#org", "name": "SNAP SURF TRIPS", "legalName": ORG["name"], "url": DOMAIN + "/",
            "logo": DOMAIN + "/img/snap-logo.png", **({"email": ORG["email"]} if ORG["email"] else {}), "telephone": ORG["tel"], "slogan": "You surf. We handle the rest.",
-           "areaServed": "Worldwide", "sameAs": [u for u in (SOCIAL["instagram"],) if u], "knowsAbout": ["surf trips", "surf camps", "surf houses", "group surf trips", "Sagres", "Algarve"]}
-    g = [org, {"@type": "WebPage", "@id": DOMAIN + "/" + path(key) + "#page", "url": DOMAIN + "/" + path(key), "name": title, "description": desc,
-               "inLanguage": LANG, "isPartOf": {"@id": DOMAIN + "/#site"}, "dateModified": TODAY},
+           "areaServed": "Worldwide", "founder": [person(n) for n, _ in PEOPLE], "sameAs": [u for u in (SOCIAL["instagram"],) if u], "knowsAbout": ["surf trips", "surf camps", "surf houses", "group surf trips", "Sagres", "Algarve"]}
+    g = [org, {"@type": "AboutPage" if key == "about" else "WebPage", "@id": DOMAIN + "/" + path(key) + "#page", "url": DOMAIN + "/" + path(key), "name": title, "description": desc,
+               "inLanguage": LANG, "isPartOf": {"@id": DOMAIN + "/#site"}, "dateModified": LM},
          {"@type": "WebSite", "@id": DOMAIN + "/#site", "url": DOMAIN + "/", "name": "SNAP SURF TRIPS", "publisher": {"@id": DOMAIN + "/#org"}, "inLanguage": ["en", "es"]}]
     if key != "home":
         g.append({"@type": "BreadcrumbList", "itemListElement": [
@@ -586,8 +587,8 @@ def schema(key, title, desc):
     if qa:
         g.append({"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa()]})
     if key in GUIDES:
-        g.append({"@type": "Article", "headline": title.split(" | ")[0], "description": desc, "inLanguage": LANG, "datePublished": TODAY, "dateModified": TODAY,
-                  "author": {"@id": DOMAIN + "/#org"}, "publisher": {"@id": DOMAIN + "/#org"}, "image": DOMAIN + "/img/og.jpg", "mainEntityOfPage": DOMAIN + "/" + path(key)})
+        g.append({"@type": "Article", "headline": title.split(" | ")[0], "description": desc, "inLanguage": LANG, "datePublished": GUIDE_PUB.get(key, "2026-11-21"), "dateModified": LM,
+                  "author": {"@id": DOMAIN + "/#" + PEOPLE[1][0].split()[0].lower()}, "publisher": {"@id": DOMAIN + "/#org"}, "image": DOMAIN + "/img/og.jpg", "mainEntityOfPage": DOMAIN + "/" + path(key)})
     if key == "bali":
         g.append({"@type": "TouristTrip", "name": L("Surf trip to Bali", "Viaje de surf a Bali"), "description": desc, "touristType": ["Surfers", "Remote workers", "Small groups"], "provider": {"@id": DOMAIN + "/#org"},
                   "itinerary": {"@type": "Place", "name": "Bukit peninsula, Bali, Indonesia", "address": {"@type": "PostalAddress", "addressRegion": "Bali", "addressCountry": "ID"}}})
@@ -603,7 +604,7 @@ def page(key):
     fn, t_en, t_es, d_en, d_es, _, _ = PAGES[key]
     title, desc = L(t_en, t_es), L(d_en, d_es)
     PRELOAD.clear()
-    body = fn()
+    body = fn() + related_block(key)
     if key in SHARE:
         body += share(key, title.split(" | ")[0])
     other = "es" if LANG == "en" else "en"
@@ -670,13 +671,13 @@ def page(key):
 <main id="main">{crumb}{body}</main>
 <footer class="foot">
 <div><a class="logo" href="{url("home")}">{logo}</a><p class="small">{L("Surf trips around the world for travellers and groups.", "Viajes de surf por el mundo para viajeros y grupos.")}<br>{ORG["email"] + " · " if ORG["email"] else ""}{ORG["tel"]}</p>{social}</div>
-<nav aria-label="{L("Site", "Sitio")}"><a href="{url("trips")}">{L("Surf destinations", "Destinos de surf")}</a><a href="{url("match")}">{L("Surf trip matcher", "Encuentra tu surf trip")}</a><a href="{url("sagres")}">{L("Surf trip to Sagres", "Viaje de surf a Sagres")}</a><a href="{url("groups")}">{L("Group surf trips", "Viajes de surf para grupos")}</a><a href="{url("camps")}">{L("For surf camps", "Para surf camps")}</a><a href="{url("guides")}">{L("Surf guides", "Guías de surf")}</a><a href="{url("faq")}">FAQ</a><a href="{url("contact")}">{L("Contact", "Contacto")}</a></nav>
+<nav aria-label="{L("Site", "Sitio")}"><a href="{url("trips")}">{L("Surf destinations", "Destinos de surf")}</a><a href="{url("match")}">{L("Surf trip matcher", "Encuentra tu surf trip")}</a><a href="{url("sagres")}">{L("Surf trip to Sagres", "Viaje de surf a Sagres")}</a><a href="{url("groups")}">{L("Group surf trips", "Viajes de surf para grupos")}</a><a href="{url("camps")}">{L("For surf camps", "Para surf camps")}</a><a href="{url("guides")}">{L("Surf guides", "Guías de surf")}</a><a href="{url("faq")}">FAQ</a><a href="{url("about")}">{L("About us", "Quiénes somos")}</a><a href="{url("contact")}">{L("Contact", "Contacto")}</a></nav>
 <nav aria-label="Legal"><a href="{url("notice")}">{L("Legal notice", "Aviso legal")}</a><a href="{url("privacy")}">{L("Privacy policy", "Privacidad")}</a><a href="{url("cookies")}">{L("Cookie policy", "Cookies")}</a><a href="{url("terms")}">{L("Terms", "Condiciones")}</a>{cks}</nav>
 <p class="small legal-line">© {TODAY[:4]} SNAP SURF TRIPS · {L("A brand of", "Marca de")} {ORG["name"]} · NIF {ORG["nif"]}</p>
 </footer>
 <dialog id="ok" aria-labelledby="ok-t">
 <svg viewBox="0 0 400 60" aria-hidden="true"><path d="M0 40 Q25 10 50 40 T100 40 T150 40 T200 40 T250 40 T300 40 T350 40 T400 40 V60 H0Z"/></svg>
-<img class="dlg-ic" src="{rel("img/snap-wave.png")}" alt="" width="72" height="42">
+<img class="dlg-ic" src="{rel("img/snap-wave.png")}" alt="" width="72" height="72">
 <p class="kicker">{L("Enquiry received", "Solicitud recibida")}</p>
 <h2 id="ok-t" class="big">{L("Shaka!<br>We got it.", "¡Shaka!<br>La tenemos.")}</h2>
 <p>{L("Your enquiry is in. We're checking the line-up and will get back to you shortly.", "Tu solicitud ya está en el agua. Estamos mirando el line-up y te escribimos en breve.")}</p>
@@ -718,12 +719,27 @@ def llms():
 - [End-of-year school surf trips (16+)]({DOMAIN}/{PATHS["school"][0]})
 - [University & Erasmus surf trips]({DOMAIN}/{PATHS["uni"][0]})
 - [Surf team building & company retreats]({DOMAIN}/{PATHS["team"][0]})
-- [Guides]({DOMAIN}/{PATHS["guides"][0]}): how to organise a group surf trip, packing list, first surf trip
+- [Guides]({DOMAIN}/{PATHS["guides"][0]}): how to organise a group surf trip, packing list, first surf trip, best time for Sagres, how to choose a surf camp, surf camp on your own
+- [About us]({DOMAIN}/{PATHS["about"][0]}): the two partners behind SNAP SURF TRIPS
 - [FAQ]({DOMAIN}/{PATHS["faq"][0]}): prices, inclusions, season, booking process
 - [For surf camps]({DOMAIN}/{PATHS["camps"][0]}): partner network
 - [Contact]({DOMAIN}/{PATHS["contact"][0]})
 - Español: {DOMAIN}/es/
 '''
+
+
+LASTMOD_FILE = SRC / "lastmod.json"   # {ruta: [huella del HTML, fecha de último cambio]}: la fecha solo avanza si la página cambia
+LASTMOD_DB = json.loads(LASTMOD_FILE.read_text()) if LASTMOD_FILE.exists() else {}
+LASTMOD = {}
+
+
+def stamp(html, k):
+    h = hashlib.md5(re.sub(r"\?v=[0-9a-f]{8}", "", html).encode()).hexdigest()
+    old = LASTMOD_DB.get(k)
+    day = old[1] if old and old[0] == h else TODAY
+    LASTMOD_DB[k] = [h, day]
+    LASTMOD[k] = day
+    return html.replace(LM, day)
 
 
 def build(out, preview):
@@ -747,7 +763,8 @@ def build(out, preview):
             CUR = path(key)
             d = out / CUR
             d.mkdir(parents=True, exist_ok=True)
-            (d / "index.html").write_text(page(key), encoding="utf-8")
+            html = page(key)
+            (d / "index.html").write_text(stamp(html, ("pre:" if preview else "pub:") + CUR), encoding="utf-8")
     if preview:
         shutil.rmtree(out / "api")
         return
@@ -766,10 +783,11 @@ def build(out, preview):
     for key in PAGES:
         alt = "".join(f'<xhtml:link rel="alternate" hreflang="{h}" href="{DOMAIN}/{PATHS[key][i]}"/>' for h, i in (("en", 0), ("es", 1), ("x-default", 0)))
         for i in (0, 1):
-            urls += f"<url><loc>{DOMAIN}/{PATHS[key][i]}</loc><lastmod>{TODAY}</lastmod>{alt}</url>\n"
+            urls += f"<url><loc>{DOMAIN}/{PATHS[key][i]}</loc><lastmod>{LASTMOD["pub:" + PATHS[key][i]]}</lastmod>{alt}</url>\n"
     (out / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + urls + "</urlset>\n", encoding="utf-8")
 
 
 build(DIST / "public", False)
 build(DIST / "preview", True)
+LASTMOD_FILE.write_text(json.dumps(LASTMOD_DB, indent=0, sort_keys=True), encoding="utf-8")
 print("ok ·", len(PAGES) * 2, "páginas · dominio:", PUBLIC_DOMAIN, "· preview:", PREVIEW_URL or "(igual)")
