@@ -1,6 +1,6 @@
 // SNAP SURF TRIPS · formularios → api/enquiry.php · popup · UTM sin cookies · consentimiento de analítica (solo si hay GA)
 (function () {
-  var B = document.body.dataset, dlg = document.getElementById('ok'), t0 = Date.now();
+  var B = document.body.dataset, dlg = document.getElementById('ok');
   var DEMO = location.protocol === 'file:' || /github\.io$/.test(location.hostname); // vista previa en local: enseña el popup sin enviar nada
 
   // UTM: sin cookies ni almacenamiento. Se leen de la URL y se propagan en los enlaces internos.
@@ -109,8 +109,18 @@
     apply();
   });
 
+  // Token antispam: se pide al empezar a rellenar el formulario (los robots que solo envían la petición no lo tienen)
+  var tok = null, tokP = null, tokAt = 0;
+  var getTok = function () {
+    if (tokP) return tokP;
+    tokP = fetch(B.api.replace('enquiry.php', 'token.php'), { cache: 'no-store' }).then(function (r) { return r.json(); })
+      .then(function (j) { tok = j.t; tokAt = Date.now(); return tok; }).catch(function () { tokP = null; tok = ''; tokAt = Date.now(); return ''; });
+    return tokP;
+  };
+
   document.querySelectorAll('form.enq').forEach(function (f) {
     var key = newKey();   // misma clave en los reintentos del mismo envío; nueva tras un envío correcto
+    if (!DEMO) ['focusin', 'pointerdown', 'keydown'].forEach(function (n) { f.addEventListener(n, function () { getTok(); }, { once: true }); });
     f.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var err = f.querySelector('.err'), btn = f.querySelector('button[type=submit]'), bad = null;
@@ -122,7 +132,7 @@
       });
       if (bad) { err.textContent = B.req; err.hidden = false; bad.focus(); return; }
 
-      var d = { type: f.dataset.type, page: location.pathname, lang: document.documentElement.lang, utm: utm, elapsed: Math.round((Date.now() - t0) / 1000), idemKey: key };
+      var d = { type: f.dataset.type, page: location.pathname, lang: document.documentElement.lang, utm: utm, idemKey: key };
       new FormData(f).forEach(function (v, k) { d[k] = typeof v === 'string' ? v.trim() : v; });
       d.consent = !!f.querySelector('[name=consent]').checked;
       d.marketing = !!f.querySelector('[name=marketing]').checked;
@@ -131,14 +141,21 @@
 
       if (DEMO) { showOk('DEMO'); return; }
       btn.disabled = true;
-      fetch(B.api, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) })
-        .then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
-        .then(function (x) {
-          if (x.s === 200 && x.j.ok) {
-            f.reset(); key = newKey(); showOk(x.j.id);
-            if (window.gtag) window.gtag('event', 'enquiry_submitted', { enquiry_type: d.type });
-          } else { throw new Error(x.j.error || 'error'); }
-        })
+      var send = function (retry) {
+        // el servidor exige un token firmado con al menos 4 s de antigüedad: se espera lo que falte (casi nunca hace falta)
+        return getTok().then(function () { return new Promise(function (r) { setTimeout(r, Math.max(0, 4300 - (Date.now() - tokAt))); }); })
+          .then(function () { d.tok = tok; return fetch(B.api, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) }); })
+          .then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
+          .then(function (x) {
+            tok = null; tokP = null;   // un token solo vale una vez
+            if (x.s === 409 && x.j.error === 'token' && !retry) return send(true);   // token caducado o ya usado: pide otro y reintenta una vez
+            if (x.s === 200 && x.j.ok) {
+              f.reset(); key = newKey(); showOk(x.j.id);
+              if (window.gtag) window.gtag('event', 'enquiry_submitted', { enquiry_type: d.type });
+            } else { throw new Error(x.j.error || 'error'); }
+          });
+      };
+      send(false)
         .catch(function () { err.textContent = B.fail; err.hidden = false; }) // nunca «recibida» sin confirmación del servidor
         .then(function () { btn.disabled = false; });
     });

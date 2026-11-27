@@ -114,7 +114,7 @@ def form(kind, fields, cta, hidden=""):
     return f'''<form class="enq" data-type="{kind}" novalidate>
 {fields}
 <label class="full">{L("Anything else we should know?", "¿Algo más que debamos saber?")}<textarea name="message" rows="4"></textarea></label>
-<input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+<input type="text" name="fax_number" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 {hidden}
 <p class="small full">{L(f"Data controller: {ORG['name']} (SNAP SURF TRIPS). Purpose: to answer your enquiry and prepare your proposal. Legal basis: steps taken at your request before a contract. Recipients: the accommodation and surf school only if you ask for a proposal or booking, and our technology providers. You can access, rectify or erase your data via {chan()}.",
  f"Responsable: {ORG['name']} (SNAP SURF TRIPS). Finalidad: responder a tu solicitud y preparar tu propuesta. Base jurídica: medidas precontractuales a petición tuya. Destinatarios: el alojamiento y la escuela de surf solo si pides propuesta o reserva, y nuestros proveedores tecnológicos. Puedes acceder, rectificar o suprimir tus datos a través de {chan()}.")} <a href="{url("privacy")}">{L("Read the privacy policy", "Lee la política de privacidad")}</a>.</p>

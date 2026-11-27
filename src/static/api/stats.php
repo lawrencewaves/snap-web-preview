@@ -13,3 +13,11 @@ foreach (['Por origen' => 'src', 'Por página' => 'page', 'Por día' => 'day'] a
     $q->execute([$from]);
     foreach ($q as $r) echo str_pad((string)$r['n'], 7, ' ', STR_PAD_LEFT), '  ', $r['k'], "\n";
 }
+// Solicitudes bloqueadas por el antispam (cuarentena de 60 días): revisar por si hubiera algún falso positivo
+$db->exec('CREATE TABLE IF NOT EXISTS blocked (at TEXT, reason TEXT, ip TEXT, email TEXT, data TEXT)');
+$q = $db->prepare("SELECT substr(reason, 1, instr(reason || ':', ':') - 1) AS k, COUNT(*) AS n FROM blocked WHERE at > ? GROUP BY k ORDER BY n DESC");
+$q->execute([gmdate('c', time() - 30 * 86400)]);
+echo "== Bloqueadas por el antispam (30 días)\n";
+foreach ($q as $r) echo str_pad((string)$r['n'], 7, ' ', STR_PAD_LEFT), '  ', $r['k'], "\n";
+echo "== Últimas 15 bloqueadas (fecha · motivo · email)\n";
+foreach ($db->query('SELECT at, reason, email FROM blocked ORDER BY at DESC LIMIT 15') as $r) echo "{$r['at']} · {$r['reason']} · {$r['email']}\n";

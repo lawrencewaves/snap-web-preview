@@ -21,8 +21,49 @@ $raw = file_get_contents('php://input', false, null, 0, 20000);
 $d = json_decode($raw ?: '', true);
 if (!is_array($d)) out(400, ['ok' => false, 'error' => 'json']);
 
-// Anti-spam: campo trampa y tiempo mínimo. A los bots se les contesta ok sin guardar nada.
-if (!empty($d['website']) || (int)($d['elapsed'] ?? 0) < 3) out(200, ['ok' => true, 'id' => 'WEB-0']);
+// ── Anti-spam por capas (sin servicios externos). A los bots se les contesta ok para que no se adapten, pero no llega nada al CRM:
+// lo bloqueado queda en cuarentena (tabla `blocked`, 60 días) y se revisa en api/stats.php?key=…
+$ipHash = hash('sha256', ($cfg['salt'] ?? '') . ($_SERVER['REMOTE_ADDR'] ?? ''));
+function quarantine(array $cfg, string $why, array $d, string $ipHash): void {
+    try {
+        $b = new PDO('sqlite:' . $cfg['db']);
+        $b->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $b->exec('CREATE TABLE IF NOT EXISTS blocked (at TEXT, reason TEXT, ip TEXT, email TEXT, data TEXT)');
+        $b->prepare('INSERT INTO blocked VALUES (?,?,?,?,?)')->execute([gmdate('c'), $why, $ipHash,
+            mb_substr((string)($d['email'] ?? ''), 0, 200), mb_substr((string)json_encode($d, JSON_UNESCAPED_UNICODE), 0, 4000)]);
+    } catch (Throwable $t) { error_log('SNAP quarantine: ' . $t->getMessage()); }
+    out(200, ['ok' => true, 'id' => 'WEB-0']);
+}
+// 1) Campo trampa (invisible para personas)
+if (!empty($d['fax_number']) || !empty($d['website'])) quarantine($cfg, 'honeypot', $d, $ipHash);
+// 2) Token firmado de api/token.php: firma válida, entre 4 s y 2 h de antigüedad (medida aquí, no en el navegador) y de un solo uso.
+//    Sin token válido o caducado → 409: el formulario pide otro y reintenta solo, así una persona nunca pierde su mensaje.
+$tp = explode('.', (string)($d['tok'] ?? ''));
+if (count($tp) !== 3 || !ctype_digit($tp[0]) || !preg_match('/^[a-f0-9]{16}$/', $tp[1]) || !preg_match('/^[a-f0-9]{32}$/', $tp[2])
+    || !hash_equals(substr(hash_hmac('sha256', $tp[0] . '.' . $tp[1], hash('sha256', (string)($cfg['salt'] ?? '') . 'tok')), 0, 32), $tp[2])
+    || time() - (int)$tp[0] > 7200) out(409, ['ok' => false, 'error' => 'token']);
+if (time() - (int)$tp[0] < 4) quarantine($cfg, 'fast', $d, $ipHash);
+// 3) Filtro de contenido: spam típico de «mejoramos tu SEO / diseño web / casino…». Puntúa; a partir de 4 se bloquea.
+function spam_score(string $t): array {
+    $t = mb_strtolower($t); $s = 0; $why = [];
+    $add = function (string $n, int $p) use (&$s, &$why) { $s += $p; $why[] = $n; };
+    if (preg_match('/\b(seo|search engine optimi[sz]ation|posicionamiento (web|seo)|primera p[aá]gina de google)\b/u', $t)
+        && preg_match('/\b(rank\w*|google|bing|traffic|competitors?|backlinks?|website|web|tr[aá]fico|competencia|posicion\w*)\b/u', $t)) $add('seo', 4);
+    foreach ([
+        'your website' => '/\b(your|tu|su) (web ?site|p[aá]gina web|sitio web)\b.*\b(our (team|agency|services)|we (can|will|offer|would)|podemos|ofrecemos|nuestro (equipo|servicio))/su',
+        'reply-number' => '/\b(reply|respond\w*|responde\w*)\b.{0,40}\b(contact )?(number|phone|n[uú]mero|tel[eé]fono)\b/su',
+        'free-offer' => '/\bfree (audit|quote|consultation|trial|report)\b|\b(auditor[ií]a|presupuesto|consulta) gratuit[ao]\b/u',
+        'webdesign' => '/\b(web ?(site)? ?(design|redesign|development)|dise[ñn]o web|desarrollo web|marketing digital|lead generation)\b/u',
+        'linkbuilding' => '/\b(guest post|backlinks?|link ?building)\b/u',
+        'scam' => '/\b(crypto\w*|bitcoin|casino|forex|viagra|investment opportunity|loan offer|inversi[oó]n garantizada)\b/u',
+        'shortener' => '/\b(bit\.ly|tinyurl|t\.co|goo\.gl)\//u',
+    ] as $n => $re) if (preg_match($re, $t)) $add($n, 2);
+    $links = preg_match_all('#https?://|www\.#u', $t);
+    if ($links >= 4) $add('links4', 4); elseif ($links >= 2) $add('links2', 2);
+    return [$s, $why];
+}
+[$sc, $why] = spam_score(implode("\n", array_map(fn($k) => is_scalar($d[$k] ?? '') ? (string)($d[$k] ?? '') : '', ['message', 'name', 'organisation', 'needs'])));
+if ($sc >= 4) quarantine($cfg, 'content:' . implode(',', $why), $d, $ipHash);
 
 $clean = function ($v, int $max = 300): string {
     $v = is_scalar($v) ? (string)$v : '';
@@ -57,7 +98,6 @@ if (isset($d['utm']) && is_array($d['utm'])) {
 $id = 'WEB-' . gmdate('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
 $e['enquiryId'] = $id;
 $e['receivedAt'] = gmdate('c');
-$ipHash = hash('sha256', ($cfg['salt'] ?? '') . ($_SERVER['REMOTE_ADDR'] ?? ''));
 
 // 1) Cola
 $saved = false;
@@ -72,6 +112,11 @@ try {
         $prev = $q->fetchColumn();
         if ($prev) out(200, ['ok' => true, 'id' => (string)$prev]);   // ya recibida: misma respuesta, sin guardar ni enviar nada
     }
+    // El token solo vale una vez (va después de la clave de idempotencia: un reintento legítimo recibe su respuesta sin gastar otro)
+    $db->exec('CREATE TABLE IF NOT EXISTS tok (n TEXT PRIMARY KEY, at TEXT)');
+    $db->prepare('DELETE FROM tok WHERE at < ?')->execute([gmdate('c', time() - 14400)]);
+    $r = $db->prepare('INSERT OR IGNORE INTO tok (n, at) VALUES (?,?)'); $r->execute([$tp[1], gmdate('c')]);
+    if ($r->rowCount() === 0) out(409, ['ok' => false, 'error' => 'token']);
     $q = $db->prepare("SELECT COUNT(*) FROM enquiries WHERE ip = ? AND received_at > ?");
     $q->execute([$ipHash, gmdate('c', time() - 3600)]);
     if ((int)$q->fetchColumn() >= (int)($cfg['maxPerHour'] ?? 5)) out(429, ['ok' => false, 'error' => 'rate']);
