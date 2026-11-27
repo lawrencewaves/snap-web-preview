@@ -2,6 +2,7 @@
 // SNAP SURF TRIPS · recibe una solicitud de la web: valida → cola SQLite → email «[WEB-ENQ]» a SNAP.
 // Solo responde ok si la solicitud ha quedado guardada en la cola o enviada por email (nunca se pierde en silencio).
 declare(strict_types=1);
+ini_set('display_errors', '0');   // nunca mostrar errores al visitante (rutas, versiones); van al log del servidor
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 
@@ -15,7 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') out(405, ['ok' => false, 'error' => '
 // Solo se aceptan envíos desde la propia web (evita que otras webs o robots usen el formulario)
 $origin = (string)($_SERVER['HTTP_ORIGIN'] ?? '');
 $allowed = array_filter((array)($cfg['allowedOrigins'] ?? []));
-if ($allowed && !in_array(rtrim($origin, '/'), $allowed, true)) out(403, ['ok' => false, 'error' => 'origin']);
+if ($allowed) { if (!in_array(rtrim($origin, '/'), $allowed, true)) out(403, ['ok' => false, 'error' => 'origin']); }
+elseif (strcasecmp((string)parse_url($origin, PHP_URL_HOST), (string)preg_replace('/:\d+$/', '', (string)($_SERVER['HTTP_HOST'] ?? ''))) !== 0) out(403, ['ok' => false, 'error' => 'origin']);   // sin lista configurada: el Origin debe ser este mismo sitio (los navegadores siempre lo envían en un POST)
 if (stripos((string)($_SERVER['CONTENT_TYPE'] ?? ''), 'application/json') !== 0) out(415, ['ok' => false, 'error' => 'type']);
 $raw = file_get_contents('php://input', false, null, 0, 20000);
 $d = json_decode($raw ?: '', true);
@@ -29,6 +31,8 @@ function quarantine(array $cfg, string $why, array $d, string $ipHash): void {
         $b = new PDO('sqlite:' . $cfg['db']);
         $b->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $b->exec('CREATE TABLE IF NOT EXISTS blocked (at TEXT, reason TEXT, ip TEXT, email TEXT, data TEXT)');
+        $c = $b->prepare('SELECT COUNT(*) FROM blocked WHERE ip = ? AND at > ?'); $c->execute([$ipHash, gmdate('c', time() - 3600)]);
+        if ((int)$c->fetchColumn() >= 10) out(429, ['ok' => false, 'error' => 'rate']);   // un robot insistente deja de guardarse y se le corta
         $b->prepare('INSERT INTO blocked VALUES (?,?,?,?,?)')->execute([gmdate('c'), $why, $ipHash,
             mb_substr((string)($d['email'] ?? ''), 0, 200), mb_substr((string)json_encode($d, JSON_UNESCAPED_UNICODE), 0, 4000)]);
     } catch (Throwable $t) { error_log('SNAP quarantine: ' . $t->getMessage()); }
@@ -135,7 +139,9 @@ try {
 $subject = "[WEB-ENQ] $id · $type" . (isset($e['listingId']) ? ' · ' . $e['listingId'] : '');
 $body = json_encode($e, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 $headers = 'From: SNAP Web <' . $cfg['from'] . ">\r\nContent-Type: text/plain; charset=utf-8\r\nX-SNAP-Enquiry: $id";
-$sent = @mail($cfg['to'], '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $headers);
+$flood = false;
+try { $fq = $db->prepare('SELECT COUNT(*) FROM enquiries WHERE received_at > ?'); $fq->execute([gmdate('c', time() - 3600)]); $flood = (int)$fq->fetchColumn() > (int)($cfg['maxMailsPerHour'] ?? 30); } catch (Throwable $t) {}
+$sent = $flood && $saved ? false : @mail($cfg['to'], '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $headers);
 if ($sent && $saved) { try { $db->prepare('UPDATE enquiries SET mail_sent = 1 WHERE id = ?')->execute([$id]); } catch (Throwable $t) {} }
 
 if (!$saved && !$sent) out(500, ['ok' => false, 'error' => 'store']);

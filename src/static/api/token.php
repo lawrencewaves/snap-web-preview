@@ -2,6 +2,7 @@
 // SNAP · token firmado para el formulario. El navegador lo pide al empezar a rellenarlo y lo devuelve al enviar;
 // enquiry.php comprueba la firma, la antigüedad medida por el servidor y que sea de un solo uso. Sin cookies ni datos personales.
 declare(strict_types=1);
+ini_set('display_errors', '0');   // nunca mostrar errores al visitante (rutas, versiones); van al log del servidor
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');

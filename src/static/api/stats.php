@@ -1,8 +1,10 @@
 <?php
 // SNAP · resumen de visitas (últimos 30 días). Uso: /api/stats.php?key=CRONKEY
 declare(strict_types=1);
+ini_set('display_errors', '0');   // nunca mostrar errores al visitante (rutas, versiones); van al log del servidor
 $cfg = require __DIR__ . '/config.php';
-if (str_starts_with((string)$cfg['cronKey'], 'CAMBIAR') || !hash_equals((string)$cfg['cronKey'], (string)($_GET['key'] ?? ''))) { http_response_code(403); exit; }
+header('Cache-Control: no-store'); header('X-Robots-Tag: noindex'); header('Referrer-Policy: no-referrer');
+if (str_starts_with((string)$cfg['cronKey'], 'CAMBIAR') || !hash_equals((string)$cfg['cronKey'], (string)($_GET['key'] ?? ''))) { sleep(2); http_response_code(403); exit; }
 header('Content-Type: text/plain; charset=utf-8');
 $db = new PDO('sqlite:' . $cfg['db']);
 $db->exec('CREATE TABLE IF NOT EXISTS hits (day TEXT, page TEXT, src TEXT, n INTEGER, PRIMARY KEY(day,page,src))');

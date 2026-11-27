@@ -2,8 +2,9 @@
 // SNAP SURF TRIPS · tarea diaria (cron de Dinahosting: php api/summary.php, o URL con ?key=...).
 // Reenvía los emails que fallaron y manda «[WEB-ENQ-RESUMEN]» con las solicitudes de 48 h para conciliar con el CRM.
 declare(strict_types=1);
+ini_set('display_errors', '0');   // nunca mostrar errores al visitante (rutas, versiones); van al log del servidor
 $cfg = require __DIR__ . '/config.php';
-if (PHP_SAPI !== 'cli' && (str_starts_with((string)$cfg['cronKey'], 'CAMBIAR') || !hash_equals((string)$cfg['cronKey'], (string)($_GET['key'] ?? '')))) { http_response_code(403); exit; }
+if (isset($_SERVER['REQUEST_METHOD'])) { http_response_code(403); exit; }   // solo lo ejecuta el cron del hosting; no es accesible por web
 
 $db = new PDO('sqlite:' . $cfg['db']);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -13,7 +14,7 @@ foreach (['blocked' => 'at', 'tok' => 'at'] as $tb => $col) { try { $db->prepare
 try { $db->prepare('DELETE FROM hits WHERE day < ?')->execute([gmdate('Y-m-d', strtotime('-13 months'))]); } catch (Throwable $t) {}
 $h = 'From: SNAP Web <' . $cfg['from'] . ">\r\nContent-Type: text/plain; charset=utf-8";
 
-foreach ($db->query('SELECT id, type, data FROM enquiries WHERE mail_sent = 0') as $r) {
+foreach ($db->query('SELECT id, type, data FROM enquiries WHERE mail_sent = 0 ORDER BY received_at LIMIT 50') as $r) {   // máx. 50 por pasada: una avalancha no inunda el buzón
     $s = "[WEB-ENQ] {$r['id']} · {$r['type']} (reenvío)";
     if (@mail($cfg['to'], '=?UTF-8?B?' . base64_encode($s) . '?=', json_encode(json_decode($r['data']), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), $h . "\r\nX-SNAP-Enquiry: {$r['id']}")) {
         $db->prepare('UPDATE enquiries SET mail_sent = 1 WHERE id = ?')->execute([$r['id']]);

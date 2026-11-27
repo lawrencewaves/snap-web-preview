@@ -1,6 +1,7 @@
 <?php
 // SNAP · contador de visitas propio, sin cookies ni identificadores: solo día, página y origen de campaña, agregados.
 declare(strict_types=1);
+ini_set('display_errors', '0');   // nunca mostrar errores al visitante (rutas, versiones); van al log del servidor
 http_response_code(204);
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') exit;
 $cfg = require __DIR__ . '/config.php';
@@ -17,5 +18,7 @@ if (preg_match('/bot|crawl|spider|slurp|preview/i', (string)($_SERVER['HTTP_USER
 try {
     $db = new PDO('sqlite:' . $cfg['db']);
     $db->exec('CREATE TABLE IF NOT EXISTS hits (day TEXT, page TEXT, src TEXT, n INTEGER, PRIMARY KEY(day,page,src))');
+    $c = $db->prepare('SELECT COUNT(*) FROM hits WHERE day = ?'); $c->execute([gmdate('Y-m-d')]);
+    if ((int)$c->fetchColumn() >= 1500) exit;   // tope diario de filas distintas (la web tiene 48 páginas)
     $db->prepare('INSERT INTO hits VALUES (?,?,?,1) ON CONFLICT(day,page,src) DO UPDATE SET n=n+1')->execute([gmdate('Y-m-d'), $page, $src ?: 'directo']);
 } catch (Throwable $t) { error_log('SNAP hit: ' . $t->getMessage()); }
